@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl" class="dark">
 
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>ELBOB HUB</title>
+<title>DARK ZONE</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -25,6 +25,42 @@ tailwind.config = {
 <style>
 *{
     font-family:"Cairo",sans-serif;
+}
+
+@keyframes dzColorShift {
+    0% {
+        color: #b91c1c; /* أحمر ياقوتي داكن */
+        text-shadow: 0 0 12px rgba(185, 28, 28, 0.7), 0 0 25px rgba(153, 27, 27, 0.4);
+    }
+    20% {
+        color: #6d28d9; /* بنفسجي ملكي غامق */
+        text-shadow: 0 0 12px rgba(109, 40, 217, 0.7), 0 0 25px rgba(91, 33, 182, 0.4);
+    }
+    40% {
+        color: #1d4ed8; /* كحلي ليلي عميق */
+        text-shadow: 0 0 12px rgba(29, 78, 216, 0.7), 0 0 25px rgba(30, 64, 175, 0.4);
+    }
+    60% {
+        color: #047857; /* زمردي داكن فخم */
+        text-shadow: 0 0 12px rgba(4, 120, 87, 0.7), 0 0 25px rgba(6, 95, 70, 0.4);
+    }
+    80% {
+        color: #64748b; /* تيتانيوم وجرافيت معدني داكن */
+        text-shadow: 0 0 12px rgba(100, 116, 139, 0.7), 0 0 25px rgba(71, 85, 105, 0.4);
+    }
+    100% {
+        color: #b91c1c; /* عودة للأحمر الداكن */
+        text-shadow: 0 0 12px rgba(185, 28, 28, 0.7), 0 0 25px rgba(153, 27, 27, 0.4);
+    }
+}
+
+.dz-brand-text {
+    display: inline-block;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    animation: dzColorShift 8s ease-in-out infinite;
+    transition: color 0.5s ease, text-shadow 0.5s ease;
 }
 
 body{
@@ -106,7 +142,7 @@ html[dir="rtl"] textarea{
 </style>
 </head>
 
-<body class="bg-slate-100 text-slate-900 dark:bg-[#070b12] dark:text-white transition-colors duration-300">`n
+<body class="bg-slate-100 text-slate-900 dark:bg-[#070b12] dark:text-white transition-colors duration-300">
 
 <!-- HEADER -->
 
@@ -116,12 +152,12 @@ html[dir="rtl"] textarea{
 
 <div class="flex items-center gap-3">
 
-<div class="w-11 h-11 rounded-2xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-black text-xl shadow-lg">
-E
+<div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-600 to-pink-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-purple-500/20">
+⚡
 </div>
 
 <div>
-<h1 class="font-black text-xl tracking-wide">ELBOB HUB</h1>
+<h1 class="font-black text-xl tracking-wider dz-brand-text">DARK ZONE</h1>
 
 <p data-i18n="headerSubtitle"
 class="text-xs text-slate-500 dark:text-slate-400">
@@ -174,11 +210,11 @@ class="min-h-[calc(100vh-82px)] flex items-center justify-center px-4 py-10">
 
 <div class="text-center mb-7">
 
-<div class="inline-flex w-20 h-20 rounded-[28px] bg-black dark:bg-white text-white dark:text-black items-center justify-center text-4xl font-black shadow-2xl mb-5">
-E
+<div class="inline-flex w-20 h-20 rounded-[28px] bg-gradient-to-br from-purple-600 via-indigo-600 to-pink-600 text-white items-center justify-center text-4xl font-black shadow-2xl shadow-purple-500/30 mb-5">
+⚡
 </div>
 
-<h2 class="text-3xl font-black">ELBOB HUB</h2>
+<h2 class="text-3xl font-black tracking-wider dz-brand-text">DARK ZONE</h2>
 
 <p data-i18n="authSubtitle"
 class="mt-2 text-slate-500 dark:text-slate-400">
@@ -488,6 +524,16 @@ class="space-y-5">
 
 <div id="yazeedAlert" class="hidden-view mb-4 px-4 py-3 rounded-xl border border-purple-500/40 bg-purple-500/10 text-purple-300 font-bold text-sm text-center">🟣 أداة يزيد متوقفة مؤقتاً</div>
 <div id="tayebAlert" class="hidden-view mb-4 px-4 py-3 rounded-xl border border-orange-500/40 bg-orange-500/10 text-orange-300 font-bold text-sm text-center">⚡ أداة الطيب متوقفة مؤقتاً</div>
+<div class="grid grid-cols-2 gap-3 mb-5">
+    <div class="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-center">
+        <p class="text-xs font-bold text-purple-400">🟣 سعر أداة يزيد (Valid)</p>
+        <p id="workerYazeedRateDisplay" class="text-xl sm:text-2xl font-black text-purple-400 mt-1">0.00 ج.م</p>
+    </div>
+    <div class="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-center">
+        <p class="text-xs font-bold text-orange-400">⚡ سعر أداة الطيب (Valid)</p>
+        <p id="workerTayebRateDisplay" class="text-xl sm:text-2xl font-black text-orange-400 mt-1">0.00 ج.م</p>
+    </div>
+</div>
 <div class="mb-5"><p class="text-sm font-bold mb-3">اختر الأداة</p><div class="grid grid-cols-2 gap-3"><label id="labelYazeed" class="cursor-pointer"><input type="radio" name="tool_name" value="yazeed" class="peer sr-only" checked><div class="px-4 py-4 rounded-2xl border-2 border-transparent bg-white/5 peer-checked:border-purple-500 peer-checked:bg-purple-500/10 text-center transition"><div class="text-2xl mb-1">🟣</div><div class="font-black text-sm">أداة يزيد</div></div></label><label id="labelTayeb" class="cursor-pointer"><input type="radio" name="tool_name" value="tayeb" class="peer sr-only"><div class="px-4 py-4 rounded-2xl border-2 border-transparent bg-white/5 peer-checked:border-orange-500 peer-checked:bg-orange-500/10 text-center transition"><div class="text-2xl mb-1">⚡</div><div class="font-black text-sm">أداة الطيب</div></div></label></div></div>
 <div class="grid md:grid-cols-2 gap-4">
 
@@ -538,17 +584,30 @@ class="file-input w-full px-4 py-4 rounded-2xl bg-slate-100 dark:bg-black/30 bor
 </div>
 
 <div>
-<label data-i18n="checkerImage"
-class="block mb-2 font-bold text-sm">
-صورة Checker
-</label>
+    <div class="flex items-center justify-between mb-2">
+        <label data-i18n="checkerImage" class="font-bold text-sm">
+            صورة Checker
+        </label>
+        <span class="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-xl border border-indigo-500/20">
+            📋 يدعم لصق السكرين شوت (Ctrl + V)
+        </span>
+    </div>
 
-<input
-id="proofFile"
-type="file"
-accept="image/*"
-required
-class="file-input w-full px-4 py-4 rounded-2xl bg-slate-100 dark:bg-black/30 border border-slate-200 dark:border-white/10">
+    <input
+        id="proofFile"
+        type="file"
+        accept="image/*"
+        required
+        onchange="handleProofFileChange(event)"
+        class="file-input w-full px-4 py-4 rounded-2xl bg-slate-100 dark:bg-black/30 border border-slate-200 dark:border-white/10"
+    >
+    <div id="proofPreviewContainer" class="hidden mt-3 p-3 rounded-2xl bg-slate-100 dark:bg-black/20 border border-slate-200 dark:border-white/10 text-center">
+        <div class="flex items-center justify-between mb-2 px-1">
+            <span class="text-xs text-slate-400 font-bold">معاينة السكرين شوت المحدد:</span>
+            <button type="button" onclick="clearProofPreview()" class="text-xs text-red-400 hover:text-red-300 font-bold">إلغاء ✖</button>
+        </div>
+        <img id="proofPreview" class="max-h-56 mx-auto rounded-xl shadow-lg border border-slate-200 dark:border-white/10 object-contain" alt="معاينة الاتشيكر">
+    </div>
 </div>
 
 <button
@@ -571,7 +630,7 @@ data-i18n="submitWork">
     </div>
     <div class="flex flex-wrap gap-2">
         <button onclick="toggleWorkerTab('unpaid_all')" id="wtab-unpaid_all" class="px-4 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black font-bold text-sm shadow">⏳ قيد الحساب</button>
-        <button onclick="toggleWorkerTab('paid')" id="wtab-paid" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-black/30 text-slate-600 dark:text-slate-300 font-bold text-sm border border-slate-200 dark:border-white/10">✅ السجل (تم الدفع)</button>
+        <button onclick="toggleWorkerTab('paid')" id="wtab-paid" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-black/30 text-slate-600 dark:text-slate-300 font-bold text-sm border border-slate-200 dark:border-white/10">📦 الأرشيف (مدفوعات قديمة)</button>
         <button onclick="toggleWorkerTab('unpaid_yazeed')" id="wtab-unpaid_yazeed" class="px-4 py-2 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold text-sm border border-purple-500/20">🟣 يزيد</button>
         <button onclick="toggleWorkerTab('unpaid_tayeb')" id="wtab-unpaid_tayeb" class="px-4 py-2 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold text-sm border border-orange-500/20">⚡ الطيب</button>
     </div>
@@ -688,6 +747,8 @@ data-i18n="refresh">
 🔄 تحديث
 </button>
 
+<button type="button" onclick="openWeeklySettlementModal()" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black shadow-lg shadow-purple-500/25 transition flex items-center gap-2">📊 تقفيل حسابات الأسبوع</button>
+
 </div>
 
 </div>
@@ -735,6 +796,46 @@ class="text-3xl font-black mt-2">0</p>
 </section>
 
 
+
+<!-- FRIDAY 2 AM SETTLEMENT ALERT -->
+<div id="fridaySettlementAlert" class="hidden-view mb-6 p-5 rounded-3xl bg-gradient-to-r from-purple-900/50 via-indigo-900/40 to-slate-900/50 border border-purple-500/30 shadow-xl">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center text-2xl">
+                🔔
+            </div>
+            <div>
+                <h4 class="font-black text-lg text-purple-300">موعد التقفيل الأسبوعي (الجمعة)</h4>
+                <p class="text-xs text-slate-300 mt-0.5">حان موعد مراجعة وتصفية مستحقات أداة يزيد وحسابات العمال للأسبوع المنتهي</p>
+            </div>
+        </div>
+        <div>
+            <button type="button" onclick="document.getElementById('accountingSection')?.scrollIntoView({behavior:'smooth'})" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs transition shadow-lg">
+                💰 فتح كشف الحساب والتقفيل
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- UNIFIED PENDING INBOX -->
+<section id="ownerPendingSection" class="mb-7 rounded-3xl border border-orange-500/30 bg-orange-500/5 p-5 md:p-7 shadow-xl">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5 border-b border-orange-500/20 pb-4">
+        <div>
+            <div class="flex items-center gap-3 flex-wrap">
+                <span class="text-2xl">⚡</span>
+                <h3 class="text-xl font-black text-orange-500 dark:text-orange-400">صندوق المراجعات المعلقة (Pending Inbox)</h3>
+                <span id="pendingBadgeCount" class="px-3 py-1 rounded-full bg-orange-500 text-white font-black text-xs">0 معلق</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">راجع واقبل أو ارفض تسليمات كل العمال مباشرة من غير ما تدخل وتخرج في كل عامل</p>
+        </div>
+        <div class="flex gap-2">
+            <button type="button" onclick="renderOwnerPendingSubmissions()" class="px-4 py-2 rounded-xl bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 text-xs font-bold transition">🔄 تحديث المعلق</button>
+        </div>
+    </div>
+    <div id="ownerPendingContainer" class="space-y-3">
+        <!-- Rendered by JS -->
+    </div>
+</section>
 <section>
 
 <div class="mb-4">
@@ -854,10 +955,25 @@ class="px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white fo
 
 <div class="mt-6">
 
-<h3 data-i18n="workerWork"
-class="text-xl font-black mb-4">
-شغل العامل
-</h3>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 border-b border-slate-200 dark:border-white/10 pb-4">
+    <div>
+        <h3 data-i18n="workerWork" class="text-xl font-black">
+            شغل العامل
+        </h3>
+        <p class="text-xs text-slate-500 mt-0.5">تصفية تسليمات العامل حسب حالة الدفع</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+        <button type="button" onclick="setSelectedWorkerTab('unpaid')" id="swTab-unpaid" class="px-4 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black font-bold text-xs shadow transition">
+            ⏳ قيد الحساب (المعلق)
+        </button>
+        <button type="button" onclick="setSelectedWorkerTab('paid')" id="swTab-paid" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-black/30 text-slate-600 dark:text-slate-300 font-bold text-xs border border-slate-200 dark:border-white/10 transition">
+            📦 الأرشيف (مدفوعات قديمة)
+        </button>
+        <button type="button" onclick="setSelectedWorkerTab('all')" id="swTab-all" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-black/30 text-slate-600 dark:text-slate-300 font-bold text-xs border border-slate-200 dark:border-white/10 transition">
+            🌍 الكل
+        </button>
+    </div>
+</div>
 
 <div id="selectedWorkerSubmissions"
 class="space-y-4"></div>
@@ -870,6 +986,24 @@ class="space-y-4"></div>
 
 
 <!-- MODAL -->
+
+<!-- DAILY SALAWAT MODAL -->
+<div id="salawatModal" class="hidden-view fixed inset-0 z-[200] modal-bg flex items-center justify-center px-4" style="background-color: rgba(0,0,0,0.85); backdrop-filter: blur(8px);">
+    <div class="w-full max-w-md rounded-3xl bg-white dark:bg-[#111827] border-2 border-emerald-500/40 p-6 sm:p-8 text-center shadow-2xl relative">
+        <div id="salawatIcon" class="w-20 h-20 mx-auto rounded-3xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-4xl mb-4 shadow-lg shadow-emerald-500/10">
+            🌸
+        </div>
+        <h3 id="salawatTitle" class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mb-3">
+            عطّر لسانك بذكر الله
+        </h3>
+        <p id="salawatText" class="text-base sm:text-lg font-bold leading-relaxed text-slate-700 dark:text-slate-200 mb-6 px-2">
+            اللَّهُمَّ صَلِّ وَسَلِّمْ وَبَارِكْ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِهِ وَصَحْبِهِ أَجْمَعِينَ 🤍
+        </p>
+        <button type="button" onclick="confirmSalawat()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-lg shadow-xl shadow-emerald-600/30 transition transform active:scale-95">
+            ✨ صَلَّيْتُ عَلَى النَّبِيِّ ﷺ ✨
+        </button>
+    </div>
+</div>
 
 <div id="confirmModal"
 class="hidden-view fixed inset-0 z-[100] modal-bg flex items-center justify-center px-4">
@@ -1479,6 +1613,7 @@ if(_hw) _hw.classList.add("hidden");
 }
 
 function showLoggedInHeader(){
+if (window.checkDailySalawat) window.checkDailySalawat();
     const wrapper = document.getElementById("authBtnsWrapper");
     if(wrapper) wrapper.classList.remove("hidden");
     document.getElementById("logoutBtn").classList.remove("hidden");
@@ -1508,6 +1643,7 @@ isTayebClosed = !!data?.is_tayeb_closed;
 currentDailyRate = Number(data?.valid_price || 0);
 window.yazeedPrice = Number(data?.yazeed_price || data?.valid_price || 0);
 window.tayebPrice = Number(data?.tayeb_price || data?.valid_price || 0);
+if (window.updateToolRatesDisplay) window.updateToolRatesDisplay();
 
 updateSiteControl();
 
@@ -2834,8 +2970,8 @@ return;
 
 }
 
-profiles =
-workersResult.data || [];
+profiles = workersResult.data || [];
+window.profiles = profiles;
 
 const submissionsResult =
 await db
@@ -2854,12 +2990,14 @@ return;
 
 }
 
-submissions =
-submissionsResult.data || [];
+submissions = submissionsResult.data || [];
+window.submissions = submissions;
 
 renderOwnerStats();
 renderWorkers();
 updateSiteControl();
+if (window.renderOwnerPendingSubmissions) window.renderOwnerPendingSubmissions();
+if (window.checkFridaySettlementAlert) window.checkFridaySettlementAlert();
 
 if(selectedWorker){
 
@@ -3258,33 +3396,50 @@ toggle.className =
    OWNER SUBMISSIONS (WITH PRICE BREAKDOWN)
 ========================================================= */
 
+let currentSelectedWorkerTab = 'unpaid';
+
+window.setSelectedWorkerTab = function(tab) {
+    currentSelectedWorkerTab = tab;
+    ['unpaid', 'paid', 'all'].forEach(t => {
+        const btn = document.getElementById('swTab-' + t);
+        if (!btn) return;
+        if (t === tab) {
+            btn.className = "px-4 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black font-bold text-xs shadow transition";
+        } else {
+            btn.className = "px-4 py-2 rounded-xl bg-slate-100 dark:bg-black/30 text-slate-600 dark:text-slate-300 font-bold text-xs border border-slate-200 dark:border-white/10 transition";
+        }
+    });
+    renderSelectedWorkerSubmissions();
+};
+
 function renderSelectedWorkerSubmissions(){
 
-const container =
-document.getElementById(
-"selectedWorkerSubmissions"
-);
+const container = document.getElementById("selectedWorkerSubmissions");
+if (!container) return;
 
-if(!selectedWorkerSubmissions.length){
+let filtered = selectedWorkerSubmissions || [];
+if (currentSelectedWorkerTab === 'unpaid') {
+    filtered = filtered.filter(s => s.payment_status !== 'paid');
+} else if (currentSelectedWorkerTab === 'paid') {
+    filtered = filtered.filter(s => s.payment_status === 'paid');
+}
 
-container.innerHTML = `
-<div class="text-center py-14 rounded-3xl border border-dashed border-slate-300 dark:border-white/10">
+if(!filtered.length){
+    let msg = t("noWorkerSubmissions");
+    if (currentSelectedWorkerTab === 'unpaid') msg = "لا توجد تسليمات معلقة (قيد الحساب) حالياً لهذا العامل 👍";
+    else if (currentSelectedWorkerTab === 'paid') msg = "الأرشيف فارغ: لا توجد مدفوعات سابقة لهذا العامل";
 
-<div class="text-4xl mb-3">📦</div>
-
-<p class="font-black">
-${t("noWorkerSubmissions")}
-</p>
-
-</div>
-`;
-
-return;
-
+    container.innerHTML = `
+    <div class="text-center py-14 rounded-3xl border border-dashed border-slate-300 dark:border-white/10">
+        <div class="text-4xl mb-3">📦</div>
+        <p class="font-black text-slate-500">${msg}</p>
+    </div>
+    `;
+    return;
 }
 
 container.innerHTML =
-selectedWorkerSubmissions.map(row=>{
+filtered.map(row=>{
 
 const date =
 formatDate(row.created_at);
@@ -4122,6 +4277,7 @@ function injectAccountingSection() {
         <button onclick="downloadAllFilesZip()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg transition flex items-center gap-2">
             📦 تحميل تيكست اليوم (ZIP)
         </button>
+        <button type="button" onclick="openWeeklySettlementModal()" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-lg transition flex items-center gap-2">📊 تقفيل حسابات الأسبوع (يزيد + الطيب)</button>
     </div>
     <div class="flex gap-2 flex-wrap">
         <button onclick="renderAccounting('all')" id="acc-all" class="px-4 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black font-bold text-sm">🌍 الكل</button>
@@ -4763,6 +4919,600 @@ document.getElementById("passwordModal").addEventListener("click", function(e) {
 </section>
 
 </main>
+<script>
+/* =========================================================
+   DARK ZONE EXTENDED FEATURES
+========================================================= */
+
+// 1. Daily Salawat Modal
+window.checkDailySalawat = function() {
+    try {
+        const today = typeof cairoDateKey === 'function' ? cairoDateKey() : new Date().toISOString().split('T')[0];
+        const stored = localStorage.getItem('daily_salat_' + today);
+        if (stored) return;
+
+        const cairoDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Africa/Cairo" }));
+        const isFriday = cairoDate.getDay() === 5;
+
+        const modal = document.getElementById("salawatModal");
+        const icon = document.getElementById("salawatIcon");
+        const title = document.getElementById("salawatTitle");
+        const text = document.getElementById("salawatText");
+
+        if (!modal) return;
+
+        if (isFriday) {
+            if (icon) icon.textContent = "🕌";
+            if (title) title.textContent = "جمعة مباركة طيبة";
+            if (text) text.textContent = "خَيْرُ يَوْمٍ طَلَعَتْ عَلَيْهِ الشَّمْسُ.. أَكْثِرُوا مِنَ الصَّلَاةِ وَالسَّلَامِ عَلَى سَيِّدِنَا مُحَمَّدٍ ﷺ 🤍";
+        } else {
+            if (icon) icon.textContent = "🌸";
+            if (title) title.textContent = "عطّر لسانك بذكر الله";
+            if (text) text.textContent = "اللَّهُمَّ صَلِّ وَسَلِّمْ وَبَارِكْ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِهِ وَصَحْبِهِ أَجْمَعِينَ 🤍";
+        }
+
+        modal.classList.remove("hidden-view");
+    } catch (e) {
+        console.error("Salawat check error:", e);
+    }
+};
+
+window.confirmSalawat = function() {
+    try {
+        const today = typeof cairoDateKey === 'function' ? cairoDateKey() : new Date().toISOString().split('T')[0];
+        localStorage.setItem('daily_salat_' + today, '1');
+        const modal = document.getElementById("salawatModal");
+        if (modal) modal.classList.add("hidden-view");
+        toast("تقبل الله منا ومنكم صالح الأعمال 🤍", "success");
+    } catch (e) {
+        const modal = document.getElementById("salawatModal");
+        if (modal) modal.classList.add("hidden-view");
+    }
+};
+
+// 2. Proof Screenshot Paste (Ctrl + V)
+document.addEventListener("paste", function(e) {
+    try {
+        const workerView = document.getElementById("workerView");
+        if (!workerView || workerView.classList.contains("hidden-view")) return;
+
+        const items = (e.clipboardData || window.clipboardData)?.items;
+        if (!items) return;
+
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf("image") !== -1) {
+                const blob = items[i].getAsFile();
+                if (!blob) continue;
+
+                const file = new File([blob], "checker_pasted_" + Date.now() + ".png", { type: blob.type });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+
+                const proofInput = document.getElementById("proofFile");
+                if (proofInput) {
+                    proofInput.files = dataTransfer.files;
+                    
+                    const previewContainer = document.getElementById("proofPreviewContainer");
+                    const previewImg = document.getElementById("proofPreview");
+                    if (previewImg && previewContainer) {
+                        previewImg.src = URL.createObjectURL(file);
+                        previewContainer.classList.remove("hidden");
+                    }
+                    toast("📋 تم لصق سكرين شوت الاتشيكر بنجاح!", "success");
+                }
+                break;
+            }
+        }
+    } catch (err) {
+        console.error("Paste handler error:", err);
+    }
+});
+
+window.clearProofPreview = function() {
+    const proofInput = document.getElementById("proofFile");
+    if (proofInput) proofInput.value = "";
+    const previewContainer = document.getElementById("proofPreviewContainer");
+    if (previewContainer) previewContainer.classList.add("hidden");
+    const previewImg = document.getElementById("proofPreview");
+    if (previewImg) previewImg.src = "";
+};
+
+window.handleProofFileChange = function(e) {
+    const file = e.target.files ? e.target.files[0] : null;
+    const previewContainer = document.getElementById("proofPreviewContainer");
+    const previewImg = document.getElementById("proofPreview");
+    if (file && previewImg && previewContainer) {
+        previewImg.src = URL.createObjectURL(file);
+        previewContainer.classList.remove("hidden");
+    } else if (previewContainer) {
+        previewContainer.classList.add("hidden");
+    }
+};
+
+// 3. Update Tool Rates Display in Worker View
+window.updateToolRatesDisplay = function() {
+    const yDisp = document.getElementById("workerYazeedRateDisplay");
+    if (yDisp) yDisp.textContent = Number(window.yazeedPrice || 0).toFixed(2) + " ج.م";
+    const tDisp = document.getElementById("workerTayebRateDisplay");
+    if (tDisp) tDisp.textContent = Number(window.tayebPrice || 0).toFixed(2) + " ج.م";
+};
+
+// 4. Owner Pending Submissions Inbox
+window.renderOwnerPendingSubmissions = function() {
+    const container = document.getElementById("ownerPendingContainer");
+    const badge = document.getElementById("pendingBadgeCount");
+    if (!container) return;
+
+    const subsList = (typeof submissions !== "undefined" && submissions.length) ? submissions : (window.submissions || []);
+    const pendingList = subsList.filter(s => s.status === "pending");
+    if (badge) badge.textContent = pendingList.length + " معلق";
+
+    if (pendingList.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-8 rounded-2xl bg-white/50 dark:bg-white/[.02] border border-dashed border-emerald-500/30">
+                <span class="text-3xl block mb-2">🎉</span>
+                <p class="font-black text-emerald-600 dark:text-emerald-400">لا توجد أي تسليمات معلقة الآن!</p>
+                <p class="text-xs text-slate-500 mt-1">كل شغل العمال متراجع ومقبول أولاً بأول</p>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = pendingList.map(row => {
+        const profsList = (typeof profiles !== "undefined" && profiles.length) ? profiles : (window.profiles || []);
+        const worker = profsList.find(p => p.id === row.worker_id);
+        const workerName = worker ? (worker.full_name || worker.username || "عامل") : "عامل";
+        const toolBadge = row.tool_name === "tayeb" 
+            ? `<span class="px-2.5 py-1 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/20 font-black text-xs">⚡ أداة الطيب</span>`
+            : `<span class="px-2.5 py-1 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 font-black text-xs">🟣 أداة يزيد</span>`;
+
+        const dateStr = row.created_at ? new Date(row.created_at).toLocaleString("ar-EG", { timeZone: "Africa/Cairo" }) : "";
+        const valid = Number(row.valid_count || 0);
+        const locked = Number(row.locked_count || 0);
+        const price = Number(row.total_price || 0).toFixed(2);
+
+        return `
+        <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-white/10 shadow-sm hover:border-orange-500/40 transition">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-100 dark:border-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center font-black text-lg">👷</div>
+                    <div>
+                        <h4 class="font-black text-base">${workerName}</h4>
+                        <p class="text-xs text-slate-500">${dateStr}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    ${toolBadge}
+                    <span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-500 font-black text-xs">المستحق: ${price} ج.م</span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-4 text-sm font-bold">
+                    <span class="text-emerald-500">✅ Valid: <strong class="text-base">${valid}</strong></span>
+                    <span class="text-yellow-500">🔒 Locked: <strong class="text-base">${locked}</strong></span>
+                </div>
+
+                <div class="flex items-center gap-2 flex-wrap">
+                    ${row.proof_image ? `
+                        <button type="button" onclick="openStorageFile('proofs','${encodeURIComponent(row.proof_image)}')" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-xs font-black transition">
+                            🖼️ صورة الإثبات
+                        </button>
+                    ` : ''}
+                    ${row.work_file ? `
+                        <button type="button" onclick="openStorageFile('work-files','${encodeURIComponent(row.work_file)}')" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-xs font-black transition">
+                            📄 ملف TXT
+                        </button>
+                    ` : ''}
+                    <button type="button" onclick="quickOwnerReview('${row.id}', 'approved')" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition shadow">
+                        ✅ قبول
+                    </button>
+                    <button type="button" onclick="quickOwnerReview('${row.id}', 'rejected')" class="px-4 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black transition shadow">
+                        ❌ رفض
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    }).join("");
+};
+
+window.quickOwnerReview = async function(id, status) {
+    if (status === "rejected") {
+        openModal("رفض التسليمة", "هل أنت متأكد من رفض هذه التسليمة؟", async (note) => {
+            await executeReview(id, "rejected", note || "");
+            await loadOwnerData();
+        }, true, "bg-red-600 text-white");
+    } else {
+        openModal("قبول التسليمة", "هل أنت متأكد من قبول هذه التسليمة مباشرة؟", async () => {
+            await executeReview(id, "approved", "");
+            await loadOwnerData();
+        }, false, "bg-emerald-600 text-white");
+    }
+};
+
+// 5. Friday Settlement Check & Modal
+window.checkFridaySettlementAlert = function() {
+    try {
+        const cairoDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Africa/Cairo" }));
+        const isFriday = cairoDate.getDay() === 5;
+        const hours = cairoDate.getHours();
+        const alertEl = document.getElementById("fridaySettlementAlert");
+        if (!alertEl) return;
+        if (isFriday) { // Active all day Friday starting 12:00 AM
+            alertEl.classList.remove("hidden-view");
+        } else {
+            alertEl.classList.add("hidden-view");
+        }
+    } catch(e){}
+};
+
+
+
+function getLastFridayCutoffDate() {
+    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Africa/Cairo" }));
+    const day = now.getDay();
+    let diff = (day >= 5) ? (day - 5) : (day + 2);
+    const friday = new Date(now);
+    friday.setDate(now.getDate() - diff);
+    const y = friday.getFullYear();
+    const m = String(friday.getMonth() + 1).padStart(2, '0');
+    const d = String(friday.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+window.getArabicDayName = function(dateInput) {
+    if(!dateInput || dateInput === 'all') return '';
+    const d = (typeof dateInput === 'string' && dateInput.length === 10) ? new Date(dateInput + 'T00:00:00') : new Date(dateInput);
+    if(isNaN(d.getTime())) return '';
+    const dayNamesAr = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+    return dayNamesAr[d.getDay()] || '';
+};
+
+formatDate = function(value) {
+    if(!value) return "-";
+    const d = new Date(value);
+    if(isNaN(d.getTime())) return value;
+    const dayName = window.getArabicDayName(d);
+    const dateStr = d.toLocaleDateString("en-GB", { timeZone: "Africa/Cairo" });
+    const timeStr = d.toLocaleTimeString((typeof lang !== 'undefined' && lang === "ar") ? "ar-EG" : "en-US", { timeZone: "Africa/Cairo", hour: "2-digit", minute: "2-digit" });
+    return `${dayName}، ${dateStr} - ${timeStr}`;
+};
+
+window.getTodayCutoffDate = function() {
+    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Africa/Cairo" }));
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+};
+
+window.stepSettlementDay = function(days) {
+    let cur = window.currentSettlementCutoff;
+    if (!cur || cur === 'all') {
+        cur = getLastFridayCutoffDate();
+    }
+    const d = new Date(cur + 'T00:00:00');
+    d.setDate(d.getDate() + days);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    window.currentSettlementCutoff = `${y}-${m}-${day}`;
+    openWeeklySettlementModal();
+};
+
+window.currentSettlementCutoff = null;
+window.currentSettlementTool = 'all'; // 'all', 'yazeed', 'tayeb'
+window.currentSettlementMode = 'cumulative'; // 'cumulative' or 'exact_day'
+
+window.inspectWorkerFromSettlement = function(workerId) {
+    const modal = document.getElementById("weeklySettlementModal");
+    if (modal) modal.remove();
+    if (typeof openWorker === "function") {
+        openWorker(workerId);
+    }
+};
+
+window.openWeeklySettlementModal = function() {
+    const allSubs = (typeof submissions !== "undefined" && submissions.length) ? submissions : (window.submissions || []);
+    const profsList = (typeof profiles !== "undefined" && profiles.length) ? profiles : (window.profiles || []);
+    
+    if (!window.currentSettlementCutoff) {
+        window.currentSettlementCutoff = getLastFridayCutoffDate();
+    }
+    const cutoffDate = window.currentSettlementCutoff;
+    const currentTool = window.currentSettlementTool || 'all';
+    const currentMode = window.currentSettlementMode || 'cumulative';
+
+    // Only approved and unpaid submissions are eligible for weekly settlement!
+    // Any submission that was already paid (or rejected) is completely excluded.
+    let eligibleSubs = allSubs.filter(s => s.status === 'approved' && s.payment_status !== 'paid');
+
+    if (cutoffDate && cutoffDate !== 'all') {
+        if (currentMode === 'exact_day') {
+            eligibleSubs = eligibleSubs.filter(s => s.created_at && s.created_at.split('T')[0] === cutoffDate);
+        } else {
+            eligibleSubs = eligibleSubs.filter(s => !s.created_at || s.created_at.split('T')[0] <= cutoffDate);
+        }
+    }
+
+    // Filter by tool if selected
+    let targetSubs = eligibleSubs;
+    if (currentTool === 'yazeed') {
+        targetSubs = eligibleSubs.filter(s => (!s.tool_name || s.tool_name === 'yazeed'));
+    } else if (currentTool === 'tayeb') {
+        targetSubs = eligibleSubs.filter(s => s.tool_name === 'tayeb');
+    }
+
+    let yazeedValid = 0, yazeedMoney = 0;
+    let tayebValid = 0, tayebMoney = 0;
+    let unpaidTotal = 0;
+
+    const workerStats = {};
+
+    targetSubs.forEach(s => {
+        const valid = Number(s.valid_count || 0);
+        const price = Number(s.total_price || 0);
+
+        unpaidTotal += price;
+
+        if (s.tool_name === 'tayeb') {
+            tayebValid += valid;
+            tayebMoney += price;
+        } else {
+            yazeedValid += valid;
+            yazeedMoney += price;
+        }
+
+        if (!workerStats[s.worker_id]) {
+            const w = profsList.find(p => p.id === s.worker_id);
+            workerStats[s.worker_id] = {
+                id: s.worker_id,
+                name: w ? (w.full_name || w.username || "عامل") : "عامل",
+                yazeedValid: 0,
+                tayebValid: 0,
+                dues: 0
+            };
+        }
+        if (s.tool_name === 'tayeb') workerStats[s.worker_id].tayebValid += valid;
+        else workerStats[s.worker_id].yazeedValid += valid;
+        workerStats[s.worker_id].dues += price;
+    });
+
+    let workersRows = Object.values(workerStats).map(w => `
+        <tr onclick="inspectWorkerFromSettlement('${w.id}')" class="cursor-pointer hover:bg-purple-500/10 transition border-b border-slate-100 dark:border-white/5 group" title="اضغط لفتح كشف حساب ${w.name}">
+            <td class="py-2.5 px-3 font-bold flex items-center justify-between">
+                <span class="group-hover:text-purple-400 group-hover:underline transition">${w.name}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20">🔍 كشف الحساب</span>
+            </td>
+            ${currentTool !== 'tayeb' ? `<td class="py-2.5 px-3 text-center text-purple-400 font-bold">${w.yazeedValid}</td>` : ''}
+            ${currentTool !== 'yazeed' ? `<td class="py-2.5 px-3 text-center text-orange-400 font-bold">${w.tayebValid}</td>` : ''}
+            <td class="py-2.5 px-3 font-black text-emerald-500">${w.dues.toFixed(2)} ج.م</td>
+        </tr>
+    `).join("");
+
+    const colSpan = (currentTool === 'all') ? 4 : 3;
+    if (!workersRows) {
+        workersRows = `<tr><td colspan="${colSpan}" class="text-center py-6 text-slate-400 font-bold">لا توجد مستحقات معلقة لهذا الاختيار والتاريخ</td></tr>`;
+    }
+
+    let displayDate = '🌍 شامل كل المعلق (بدون حد)';
+    let dateSubtitle = 'تصفية الشغل المعلق المقبول دون المساس بما تم سداده مسبقاً';
+    if (cutoffDate && cutoffDate !== 'all') {
+        const dayName = window.getArabicDayName(cutoffDate);
+        if (currentMode === 'exact_day') {
+            displayDate = `🎯 يوم (${dayName} ${cutoffDate}) فقط`;
+            dateSubtitle = `يتم حساب وتسوية ملفات هذا اليوم فقط واستبعاد أي أيام سابقة أو تالية`;
+        } else {
+            displayDate = `📈 تراكمي حتى (${dayName} ${cutoffDate})`;
+            dateSubtitle = `أي شغل بعد اليوم ده يظل محفوظاً في الأسبوع الجديد ومبيتحسبش دلوقتي`;
+        }
+    }
+
+    let toolBadgeText = "يزيد + الطيب";
+    let btnActionText = `💸 تأكيد السداد [${unpaidTotal.toFixed(2)} ج.م] ونقل للأرشيف`;
+    if (currentTool === 'yazeed') {
+        toolBadgeText = "أداة يزيد فقط";
+        btnActionText = `💸 تأكيد سداد أداة يزيد [${unpaidTotal.toFixed(2)} ج.م] ونقل للأرشيف`;
+    } else if (currentTool === 'tayeb') {
+        toolBadgeText = "أداة الطيب فقط";
+        btnActionText = `💸 تأكيد سداد أداة الطيب [${unpaidTotal.toFixed(2)} ج.م] ونقل للأرشيف`;
+    }
+
+    const modalHTML = `
+        <div id="weeklySettlementModal" class="fixed inset-0 z-[150] modal-bg flex items-center justify-center px-4" style="background-color: rgba(0,0,0,0.85); backdrop-filter: blur(8px);">
+            <div class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#111827] border border-purple-500/30 p-6 sm:p-7 shadow-2xl">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-white/10 pb-4">
+                    <div>
+                        <h3 class="text-2xl font-black text-purple-400">📊 تقفيل الحسابات (${toolBadgeText})</h3>
+                        <p class="text-xs text-slate-500 mt-1">${dateSubtitle}</p>
+                    </div>
+                    <button type="button" onclick="document.getElementById('weeklySettlementModal').remove()" class="text-slate-400 hover:text-white text-xl font-bold p-2">✖</button>
+                </div>
+
+                <!-- TOOL FILTER TABS -->
+                <div class="mb-4 flex items-center justify-between gap-3 flex-wrap">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-xs font-bold text-slate-400 ml-1">الأداة:</span>
+                        <button type="button" onclick="window.currentSettlementTool='all'; openWeeklySettlementModal();" class="px-3 py-1.5 rounded-xl text-xs font-black transition ${currentTool === 'all' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25' : 'bg-slate-100 dark:bg-white/5 text-slate-400 hover:text-white border border-slate-200 dark:border-white/10'}">
+                            🌍 الكل (يزيد + الطيب)
+                        </button>
+                        <button type="button" onclick="window.currentSettlementTool='yazeed'; openWeeklySettlementModal();" class="px-3 py-1.5 rounded-xl text-xs font-black transition ${currentTool === 'yazeed' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25' : 'bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20'}">
+                            🟣 أداة يزيد فقط
+                        </button>
+                        <button type="button" onclick="window.currentSettlementTool='tayeb'; openWeeklySettlementModal();" class="px-3 py-1.5 rounded-xl text-xs font-black transition ${currentTool === 'tayeb' ? 'bg-orange-600 text-white shadow-lg shadow-orange-500/25' : 'bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 border border-orange-500/20'}">
+                            ⚡ أداة الطيب فقط
+                        </button>
+                    </div>
+
+                    <!-- MODE SELECTOR: CUMULATIVE VS EXACT DAY -->
+                    <div class="flex items-center gap-1 bg-slate-100 dark:bg-white/5 p-1 rounded-xl border border-slate-200 dark:border-white/10">
+                        <button type="button" onclick="window.currentSettlementMode='cumulative'; openWeeklySettlementModal();" class="px-2.5 py-1 rounded-lg text-xs font-black transition ${currentMode === 'cumulative' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'}" title="حساب كل الشغل المتراكم حتى هذا اليوم">
+                            📈 تراكمي (أسبوع)
+                        </button>
+                        <button type="button" onclick="window.currentSettlementMode='exact_day'; openWeeklySettlementModal();" class="px-2.5 py-1 rounded-lg text-xs font-black transition ${currentMode === 'exact_day' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}" title="حساب شغل هذا اليوم المحدد فقط">
+                            🎯 اليوم ده فقط
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CUTOFF CONTROLS (EASY 1-CLICK & STEPPING) -->
+                <div class="mb-5 p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-xs font-bold text-purple-400">📅 النطاق المحسوب:</span>
+                                <span class="px-3 py-1 rounded-xl bg-purple-500/20 text-purple-300 font-bold text-xs ltr-input">${displayDate}</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1">${dateSubtitle}</p>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button type="button" onclick="window.currentSettlementMode='cumulative'; window.currentSettlementCutoff=getLastFridayCutoffDate(); openWeeklySettlementModal();" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs transition shadow-md shadow-purple-600/25 flex items-center gap-1">
+                                ⚡ آخر جمعة
+                            </button>
+                            <button type="button" onclick="window.currentSettlementMode='exact_day'; window.currentSettlementCutoff=getTodayCutoffDate(); openWeeklySettlementModal();" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition shadow-md shadow-indigo-600/25 flex items-center gap-1">
+                                ☀️ النهاردة فقط
+                            </button>
+                            <button type="button" onclick="window.currentSettlementMode='cumulative'; window.currentSettlementCutoff='all'; openWeeklySettlementModal();" class="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 font-bold text-xs transition">
+                                🌍 الكل
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between pt-3 border-t border-purple-500/10 gap-2 flex-wrap">
+                        <span class="text-[11px] font-bold text-slate-400">تغيير اليوم بضغطة زر:</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="stepSettlementDay(-1)" class="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-white/10 hover:bg-purple-600 hover:text-white text-slate-800 dark:text-slate-200 font-bold text-xs transition flex items-center gap-1" title="يوم للخلف">
+                                ◀️ يوم للخلف
+                            </button>
+                            <input type="date" id="settlementCutoffInput" value="${cutoffDate === 'all' ? '' : cutoffDate}" onchange="if(this.value){ window.currentSettlementCutoff=this.value; openWeeklySettlementModal(); }" class="px-3 py-1.5 rounded-xl bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 outline-none text-xs font-bold ltr-input" title="أو حدد تاريخ معين">
+                            <button type="button" onclick="stepSettlementDay(1)" class="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-white/10 hover:bg-purple-600 hover:text-white text-slate-800 dark:text-slate-200 font-bold text-xs transition flex items-center gap-1" title="يوم للأمام">
+                                ▶️ يوم للأمام
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STATS CARDS -->
+                <div class="grid grid-cols-1 ${currentTool === 'all' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-3 mb-6">
+                    ${(currentTool === 'all' || currentTool === 'yazeed') ? `
+                    <div class="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-center">
+                        <p class="text-xs text-purple-400 font-bold">🟣 معلق أداة يزيد</p>
+                        <p class="text-xl font-black text-purple-400 mt-1">${yazeedValid} Valid</p>
+                        <p class="text-xs text-slate-400 mt-0.5">${yazeedMoney.toFixed(2)} ج.م</p>
+                    </div>` : ''}
+
+                    ${(currentTool === 'all' || currentTool === 'tayeb') ? `
+                    <div class="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-center">
+                        <p class="text-xs text-orange-400 font-bold">⚡ معلق أداة الطيب</p>
+                        <p class="text-xl font-black text-orange-400 mt-1">${tayebValid} Valid</p>
+                        <p class="text-xs text-slate-400 mt-0.5">${tayebMoney.toFixed(2)} ج.م</p>
+                    </div>` : ''}
+
+                    <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+                        <p class="text-xs text-emerald-400 font-bold">💰 صافي المستحق للسداد</p>
+                        <p class="text-xl font-black text-emerald-400 mt-1">${unpaidTotal.toFixed(2)} ج.م</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="font-black text-sm">📋 تفصيل مستحقات كل عامل المعلقة:</h4>
+                    <span class="text-[11px] text-purple-400 font-bold">💡 اضغط على أي عامل لفتح كشف حسابه</span>
+                </div>
+                <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-white/10 mb-6">
+                    <table class="w-full text-right text-xs">
+                        <thead class="bg-slate-100 dark:bg-white/5 font-black">
+                            <tr>
+                                <th class="py-2.5 px-3">العامل (اضغط للعرض)</th>
+                                ${currentTool !== 'tayeb' ? `<th class="py-2.5 px-3 text-center">يزيد (Valid)</th>` : ''}
+                                ${currentTool !== 'yazeed' ? `<th class="py-2.5 px-3 text-center">الطيب (Valid)</th>` : ''}
+                                <th class="py-2.5 px-3">المستحق</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${workersRows}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="button" onclick="confirmBatchWeeklySettlement()" class="flex-1 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
+                        ${btnActionText}
+                    </button>
+                    <button type="button" onclick="document.getElementById('weeklySettlementModal').remove()" class="py-3.5 px-6 rounded-2xl bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-white font-black text-sm transition">
+                        إغلاق
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const old = document.getElementById("weeklySettlementModal");
+    if (old) old.remove();
+    document.body.insertAdjacentHTML("beforeend", modalHTML);
+};
+
+window.confirmBatchWeeklySettlement = function() {
+    const allSubs = (typeof submissions !== "undefined" && submissions.length) ? submissions : (window.submissions || []);
+    const cutoffDate = window.currentSettlementCutoff || getLastFridayCutoffDate();
+    const currentTool = window.currentSettlementTool || 'all';
+    const currentMode = window.currentSettlementMode || 'cumulative';
+
+    let unpaidApproved = allSubs.filter(s => s.status === "approved" && s.payment_status !== "paid");
+    if (cutoffDate && cutoffDate !== 'all') {
+        if (currentMode === 'exact_day') {
+            unpaidApproved = unpaidApproved.filter(s => s.created_at && s.created_at.split('T')[0] === cutoffDate);
+        } else {
+            unpaidApproved = unpaidApproved.filter(s => !s.created_at || s.created_at.split('T')[0] <= cutoffDate);
+        }
+    }
+
+    if (currentTool === 'yazeed') {
+        unpaidApproved = unpaidApproved.filter(s => (!s.tool_name || s.tool_name === 'yazeed'));
+    } else if (currentTool === 'tayeb') {
+        unpaidApproved = unpaidApproved.filter(s => s.tool_name === 'tayeb');
+    }
+
+    if (!unpaidApproved.length) {
+        return toast("لا توجد مستحقات مقبولة معلقة للسداد لهذا الاختيار!", "warning");
+    }
+
+    const totalMoney = unpaidApproved.reduce((sum, s) => sum + Number(s.total_price || 0), 0);
+    const dayName = window.getArabicDayName(cutoffDate);
+    const scopeText = (cutoffDate === 'all') ? 'شامل كل المعلق' : (currentMode === 'exact_day' ? `ليوم (${dayName} ${cutoffDate}) فقط` : `تراكمي حتى تاريخ (${dayName} ${cutoffDate})`);
+    const toolTitle = (currentTool === 'yazeed') ? 'أداة يزيد فقط' : (currentTool === 'tayeb' ? 'أداة الطيب فقط' : 'يزيد + الطيب');
+
+    openModal(
+        `تأكيد سداد مستحقات (${toolTitle}) ونقل للأرشيف`,
+        `هل أنت متأكد من تأكيد سداد المستحقات المعلقة لـ (${toolTitle}) ${scopeText} بإجمالي (${totalMoney.toFixed(2)} ج.م) لعدد (${unpaidApproved.length}) تسليمة؟\n\n📦 سيتم نقل هذه التسليمات فقط إلى الأرشيف (مدفوعات قديمة).\n⚡ أي تسليمات أخرى ستظل محفوظة كما هي.`,
+        async () => {
+            let successCount = 0;
+            for (const sub of unpaidApproved) {
+                try {
+                    await db.rpc("mark_submission_paid", { p_submission_id: sub.id });
+                    successCount++;
+                } catch(e) {
+                    console.error("Error marking paid:", sub.id, e);
+                }
+            }
+            toast(`✅ تم سداد (${successCount}) تسليمة لـ (${toolTitle}) بنجاح ونقلها للأرشيف!`, "success");
+            const modal = document.getElementById("weeklySettlementModal");
+            if (modal) modal.remove();
+            await loadOwnerData();
+        },
+        false,
+        "bg-emerald-600 text-white"
+    );
+};
+
+
+// Auto check salawat and update rates on page load
+document.addEventListener("DOMContentLoaded", function() {
+    setTimeout(function() {
+        if (window.checkDailySalawat) window.checkDailySalawat();
+        if (window.updateToolRatesDisplay) window.updateToolRatesDisplay();
+    }, 800);
+});
+</script>
+
 </body>
 </html>
 
