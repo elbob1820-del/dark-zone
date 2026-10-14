@@ -1,0 +1,3795 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="theme-color" content="#070b12">
+<title>DARK ZONE</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+if (window.tailwind) tailwind.config = {
+    darkMode: "class",
+    theme: {
+        extend: {
+            fontFamily: { sans: ["Cairo", "sans-serif"] }
+        }
+    }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+* { font-family: "Cairo", sans-serif; -webkit-tap-highlight-color: transparent; }
+body { min-height: 100vh; }
+
+/* ===== brand ===== */
+@keyframes dzColorShift {
+    0%   { color: #b91c1c; text-shadow: 0 0 12px rgba(185,28,28,.7), 0 0 25px rgba(153,27,27,.4); }
+    20%  { color: #6d28d9; text-shadow: 0 0 12px rgba(109,40,217,.7), 0 0 25px rgba(91,33,182,.4); }
+    40%  { color: #1d4ed8; text-shadow: 0 0 12px rgba(29,78,216,.7), 0 0 25px rgba(30,64,175,.4); }
+    60%  { color: #047857; text-shadow: 0 0 12px rgba(4,120,87,.7), 0 0 25px rgba(6,95,70,.4); }
+    80%  { color: #64748b; text-shadow: 0 0 12px rgba(100,116,139,.7), 0 0 25px rgba(71,85,105,.4); }
+    100% { color: #b91c1c; text-shadow: 0 0 12px rgba(185,28,28,.7), 0 0 25px rgba(153,27,27,.4); }
+}
+.dz-brand-text { display:inline-block; font-weight:900; letter-spacing:.14em; animation: dzColorShift 8s ease-in-out infinite; }
+
+/* ===== basics ===== */
+.hidden-view { display: none !important; }
+.glass { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.ltr { direction: ltr !important; text-align: left !important; }
+.num { font-variant-numeric: tabular-nums; }
+input, button, select, textarea { transition: .15s ease; }
+button:disabled { opacity: .55; cursor: not-allowed; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+.loader { width:20px; height:20px; border:3px solid rgba(255,255,255,.25); border-top-color:currentColor; border-radius:50%; animation: spin .8s linear infinite; display:inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== page transitions ===== */
+.page-enter { animation: pageIn .28s ease both; }
+@keyframes pageIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform:none; } }
+
+.toast { animation: toastIn .25s ease; }
+@keyframes toastIn { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform:none; } }
+
+.modal-bg { background: rgba(2,6,15,.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.modal-card { animation: modalIn .25s cubic-bezier(.2,.9,.3,1.2) both; }
+@keyframes modalIn { from { opacity:0; transform: scale(.92) translateY(10px); } to { opacity:1; transform:none; } }
+
+.pop { animation: pop .5s cubic-bezier(.2,.9,.3,1.4) both; }
+@keyframes pop { 0% { transform: scale(.3); opacity:0; } 100% { transform: scale(1); opacity:1; } }
+
+.shake { animation: shake .45s ease; }
+@keyframes shake { 0%,100%{transform:none} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+
+/* ===== confetti ===== */
+.confetti-piece { position: fixed; top: -12px; width: 9px; height: 14px; border-radius: 2px; z-index: 400; pointer-events: none; animation: confettiFall linear forwards; }
+@keyframes confettiFall { to { transform: translateY(110vh) rotate(720deg); opacity: .9; } }
+
+/* ===== cards ===== */
+.card { border-radius: 1.5rem; border: 1px solid rgb(226 232 240); background: #fff; }
+.dark .card { border-color: rgba(255,255,255,.08); background: rgba(255,255,255,.035); }
+
+.nav-item { display:flex; align-items:center; gap:.75rem; padding:.7rem 1rem; border-radius:1rem; font-weight:800; font-size:.92rem; color: rgb(100 116 139); }
+.nav-item:hover { background: rgba(148,163,184,.12); color: inherit; }
+.nav-item.active { color:#fff; }
+.nav-item .nav-badge { margin-inline-start:auto; min-width:1.4rem; padding:0 .4rem; border-radius:999px; font-size:.72rem; text-align:center; background:#f97316; color:#fff; }
+
+.bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
+.bnav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:.1rem; padding:.55rem 0 .45rem; font-size:.7rem; font-weight:800; color: rgb(100 116 139); position: relative; }
+.bnav-item .ico { font-size:1.25rem; line-height:1; }
+.bnav-item.active { color: inherit; }
+.bnav-item.active::before { content:""; position:absolute; top:0; width:28px; height:3px; border-radius:0 0 4px 4px; background: var(--accent, #6366f1); }
+.bnav-item .nav-badge { position:absolute; top:4px; inset-inline-start:calc(50% + 6px); min-width:1.1rem; padding:0 .3rem; border-radius:999px; font-size:.62rem; background:#f97316; color:#fff; }
+
+.input { width:100%; padding:.8rem 1rem; border-radius:1rem; background: rgb(241 245 249); border:1px solid rgb(226 232 240); outline:none; font-weight:700; }
+.dark .input { background: rgba(0,0,0,.3); border-color: rgba(255,255,255,.1); }
+.input:focus { border-color:#6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
+
+/* لما المتصفح يملا الخانة لوحده (Autofill) بيلونها لبني فاتح والكلام بيختفي — بنرجّع ألوان الموقع */
+.input:-webkit-autofill, .input:-webkit-autofill:hover, .input:-webkit-autofill:focus, .input:-webkit-autofill:active {
+    -webkit-text-fill-color: rgb(15 23 42);
+    caret-color: rgb(15 23 42);
+    -webkit-box-shadow: 0 0 0 1000px rgb(241 245 249) inset !important;
+    box-shadow: 0 0 0 1000px rgb(241 245 249) inset !important;
+    transition: background-color 9999s ease-out 0s;
+}
+.dark .input:-webkit-autofill, .dark .input:-webkit-autofill:hover, .dark .input:-webkit-autofill:focus, .dark .input:-webkit-autofill:active {
+    -webkit-text-fill-color: #fff;
+    caret-color: #fff;
+    -webkit-box-shadow: 0 0 0 1000px #0d121b inset !important;
+    box-shadow: 0 0 0 1000px #0d121b inset !important;
+}
+.input:autofill { color: inherit; }
+
+.chip { padding:.45rem .9rem; border-radius:.8rem; font-weight:800; font-size:.8rem; border:1px solid transparent; }
+.chip-idle { background: rgb(241 245 249); color: rgb(71 85 105); border-color: rgb(226 232 240); }
+.dark .chip-idle { background: rgba(255,255,255,.05); color: rgb(203 213 225); border-color: rgba(255,255,255,.08); }
+.chip-active { background:#0f172a; color:#fff; }
+.dark .chip-active { background:#fff; color:#0f172a; }
+
+table.dz-table th { font-weight:900; font-size:.75rem; color: rgb(100 116 139); padding:.7rem .8rem; text-align:start; white-space:nowrap; }
+table.dz-table td { padding:.75rem .8rem; border-top:1px solid rgba(148,163,184,.15); font-size:.85rem; white-space:nowrap; }
+
+.thumb { width:64px; height:64px; border-radius:.9rem; object-fit:cover; background: rgba(148,163,184,.15); cursor: zoom-in; }
+
+.bar { transition: height .5s ease; }
+</style>
+</head>
+
+<body class="bg-slate-100 text-slate-900 dark:bg-[#070b12] dark:text-white transition-colors duration-300">
+
+<!-- ================= AUTH ================= -->
+<div id="authScreen" class="hidden-view min-h-screen flex flex-col">
+<header class="sticky top-0 z-30 border-b border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#070b12]/85 glass">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-600 to-pink-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-purple-500/20">⚡</div>
+            <div>
+                <p class="font-black text-xl dz-brand-text">DARK ZONE</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">مكان يليق بشغلك 🖤</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="button" onclick="toggleLanguage()" data-noi18n class="langBtn px-3 h-10 rounded-xl bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 text-sm font-bold">EN</button>
+            <button type="button" onclick="toggleTheme()" class="themeBtn w-10 h-10 rounded-xl bg-slate-200 dark:bg-white/10">☀️</button>
+        </div>
+    </div>
+</header>
+<main class="flex-1 flex items-center justify-center px-4 py-10">
+    <div class="w-full max-w-md">
+        <div class="text-center mb-7">
+            <div class="inline-flex w-20 h-20 rounded-[28px] bg-gradient-to-br from-purple-600 via-indigo-600 to-pink-600 text-white items-center justify-center text-4xl font-black shadow-2xl shadow-purple-500/30 mb-5">⚡</div>
+            <h1 class="text-3xl font-black dz-brand-text">DARK ZONE</h1>
+            <p class="mt-2 text-slate-500 dark:text-slate-400">تعبك محسوب.. وإنجازك مقدّر 🖤</p>
+        </div>
+
+        <div class="card p-5 md:p-7 shadow-2xl">
+            <div class="grid grid-cols-2 gap-2 mb-6">
+                <button id="loginTab" type="button" onclick="showAuthMode('login')" class="py-3 rounded-2xl font-bold">تسجيل الدخول</button>
+                <button id="registerTab" type="button" onclick="showAuthMode('register')" class="py-3 rounded-2xl font-bold">إنشاء حساب</button>
+            </div>
+
+            <form id="loginForm" onsubmit="login(event)" novalidate class="space-y-4">
+                <div>
+                    <label class="block mb-2 text-sm font-bold">البريد الإلكتروني</label>
+                    <input id="loginEmail" name="email" type="text" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" required autocomplete="username email" placeholder="example@email.com" class="input ltr">
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm font-bold">كلمة المرور</label>
+                    <div class="relative">
+                        <input id="loginPassword" name="password" type="password" required autocomplete="current-password" placeholder="••••••••" class="input ltr">
+                        <button type="button" onclick="togglePasswordVisibility('loginPassword', this)" class="absolute right-3 top-3 text-slate-400 text-lg">👁</button>
+                    </div>
+                    <div class="mt-2">
+                        <button type="button" onclick="forgotPasswordPrompt()" class="text-xs font-bold text-cyan-500 hover:text-cyan-400">نسيت كلمة المرور؟ 🔑</button>
+                    </div>
+                </div>
+                <button id="loginSubmit" class="w-full py-3.5 rounded-2xl bg-black text-white dark:bg-white dark:text-black font-black">دخول</button>
+            </form>
+
+            <form id="registerForm" onsubmit="register(event)" class="space-y-4 hidden-view">
+                <div>
+                    <label class="block mb-2 text-sm font-bold">الاسم الكامل</label>
+                    <input id="regName" name="name" autocomplete="name" required maxlength="60" placeholder="اسمك" class="input">
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm font-bold">اسم المستخدم</label>
+                    <input id="regUsername" name="nickname" autocomplete="nickname" autocapitalize="none" spellcheck="false" required maxlength="30" placeholder="username" class="input ltr">
+                    <p class="text-[11px] text-slate-500 mt-1">حروف إنجليزي وأرقام و _ و . بس</p>
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm font-bold">رقم الكاش</label>
+                    <input id="regCash" name="cash" autocomplete="off" required inputmode="numeric" maxlength="11" placeholder="01xxxxxxxxx" class="input ltr">
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm font-bold">البريد الإلكتروني</label>
+                    <input id="regEmail" name="email" type="email" autocapitalize="none" required autocomplete="username email" placeholder="example@email.com" class="input ltr">
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm font-bold">كلمة المرور</label>
+                    <div class="relative">
+                        <input id="regPassword" name="new-password" type="password" minlength="6" required autocomplete="new-password" placeholder="6 أحرف على الأقل" class="input ltr">
+                        <button type="button" onclick="togglePasswordVisibility('regPassword', this)" class="absolute right-3 top-3 text-slate-400 text-lg">👁</button>
+                    </div>
+                </div>
+                <button id="registerSubmit" class="w-full py-3.5 rounded-2xl bg-black text-white dark:bg-white dark:text-black font-black">إنشاء الحساب</button>
+            </form>
+        </div>
+    </div>
+</main>
+<p class="text-center text-[11px] text-slate-400 pb-4" data-noi18n>DARK ZONE · v2.12 (212)</p>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div id="appShell" class="hidden-view min-h-screen lg:flex">
+
+    <!-- Sidebar (desktop) -->
+    <aside class="hidden lg:flex lg:flex-col w-72 shrink-0 h-screen sticky top-0 border-e border-slate-200 dark:border-white/10 bg-white/70 dark:bg-white/[.02] glass p-5">
+        <div class="flex items-center gap-3 mb-8 px-1">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-600 to-pink-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-purple-500/20">⚡</div>
+            <div>
+                <p class="font-black text-xl dz-brand-text">DARK ZONE</p>
+                <p id="sideRole" class="text-xs text-slate-500 font-bold">-</p>
+            </div>
+        </div>
+        <nav id="sideNav" class="space-y-1.5 flex-1"></nav>
+        <div class="pt-4 border-t border-slate-200 dark:border-white/10">
+            <div class="flex items-center gap-3 px-1 mb-3">
+                <div id="sideAvatar" class="w-10 h-10 rounded-xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-black">?</div>
+                <div class="min-w-0">
+                    <p id="sideName" class="font-black text-sm truncate">-</p>
+                    <p id="sideUser" class="text-xs text-slate-500 truncate ltr">-</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button type="button" onclick="toggleTheme()" class="themeBtn w-10 h-10 rounded-xl bg-slate-200 dark:bg-white/10">☀️</button>
+                <button type="button" onclick="toggleLanguage()" data-noi18n class="langBtn px-3 h-10 rounded-xl bg-slate-200 dark:bg-white/10 text-sm font-bold">EN</button>
+                <button type="button" onclick="openChangePassword()" class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-white/10" title="تغيير الباسورد">🔑</button>
+                <button type="button" onclick="logout()" class="flex-1 h-10 rounded-xl bg-red-500/10 text-red-500 font-black text-sm">🚪 خروج</button>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 min-w-0 flex flex-col">
+        <!-- Top bar (mobile) -->
+        <header class="lg:hidden sticky top-0 z-30 border-b border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#070b12]/85 glass">
+            <div class="px-4 py-3 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 via-indigo-600 to-pink-600 text-white flex items-center justify-center font-black">⚡</div>
+                    <p class="font-black text-lg dz-brand-text">DARK ZONE</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="toggleLanguage()" data-noi18n class="langBtn px-2.5 h-9 rounded-xl bg-slate-200 dark:bg-white/10 text-xs font-bold">EN</button>
+                    <button type="button" onclick="toggleTheme()" class="themeBtn w-9 h-9 rounded-xl bg-slate-200 dark:bg-white/10">☀️</button>
+                    <button type="button" onclick="openChangePassword()" class="w-9 h-9 rounded-xl bg-slate-200 dark:bg-white/10" title="تغيير الباسورد">🔑</button>
+                    <button type="button" onclick="logout()" class="w-9 h-9 rounded-xl bg-red-500/10 text-red-500" title="خروج">🚪</button>
+                </div>
+            </div>
+        </header>
+
+        <main id="page" class="flex-1 w-full max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-28 lg:pb-10"></main>
+    </div>
+
+    <!-- Bottom nav (mobile) -->
+    <nav id="bottomNav" class="bottom-nav lg:hidden fixed bottom-0 inset-x-0 z-30 flex border-t border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#0b111c]/95 glass"></nav>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toastContainer" class="fixed bottom-24 lg:bottom-6 left-4 z-[500] space-y-3"></div>
+
+<!-- Image viewer -->
+<div id="imageViewer" class="hidden-view fixed inset-0 z-[450] modal-bg flex items-center justify-center p-4" onclick="closeImageViewer()">
+    <img id="imageViewerImg" class="max-w-full max-h-[90vh] rounded-2xl shadow-2xl" alt="Checker">
+</div>
+
+<!-- Daily salawat -->
+<div id="salawatModal" class="hidden-view fixed inset-0 z-[300] modal-bg flex items-center justify-center px-4">
+    <div class="modal-card w-full max-w-md rounded-3xl bg-white dark:bg-[#111827] border-2 border-emerald-500/40 p-6 sm:p-8 text-center shadow-2xl">
+        <div id="salawatIcon" class="w-20 h-20 mx-auto rounded-3xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-4xl mb-4">🌸</div>
+        <h3 id="salawatTitle" class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mb-3">عطّر لسانك بذكر الله</h3>
+        <p id="salawatText" data-noi18n style="white-space:pre-line" class="text-base sm:text-lg font-bold leading-relaxed text-slate-700 dark:text-slate-200 mb-6 px-2"></p>
+        <button type="button" onclick="confirmSalawat()" data-noi18n class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-lg shadow-xl shadow-emerald-600/30 active:scale-95 transition">✨ صَلَّيْتُ عَلَى النَّبِيِّ ﷺ ✨</button>
+    </div>
+</div>
+<script>
+/* =========================================================
+   DARK ZONE v2
+   ملاحظة: كل الصلاحيات الحقيقية في Supabase (RLS + RPC)
+   — الشروط اللي هنا للواجهة بس.
+========================================================= */
+
+/* ===================== SUPABASE ===================== */
+
+const SUPABASE_URL = "https://ywmknardakcpncvhlosy.supabase.co";
+const SUPABASE_KEY = "sb_publishable_-eV0eYhMoP9pR_fJnC2tUQ_KrPggVdL";
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
+
+/* ===================== STATE ===================== */
+
+const S = {
+    user: null,
+    me: null,                 // my profile
+    settings: {
+        closed: false, yClosed: false, tClosed: false, yPrice: 0, tPrice: 0
+    },
+    subs: [],                 // submissions visible to me
+    workers: [],              // owner/supervisor: all workers
+    staff: [],                // owner/supervisor: owner + supervisors (for "reviewed by")
+    loaded: false,
+    hashSupport: null,        // null = unknown, true/false after first try
+    submitting: false,
+    timers: []
+};
+
+const TOOLS = {
+    yazeed: {
+        key: "yazeed", name: "يزيد", full: "أداة يزيد", icon: "🟣",
+        text: "text-purple-500", textSoft: "text-purple-400",
+        bg: "bg-purple-500/10", border: "border-purple-500/25",
+        solid: "bg-purple-600 hover:bg-purple-700", grad: "from-purple-600 to-indigo-600",
+        hex: "#9333ea"
+    },
+    tayeb: {
+        key: "tayeb", name: "الطيب", full: "أداة الطيب", icon: "⚡",
+        text: "text-orange-500", textSoft: "text-orange-400",
+        bg: "bg-orange-500/10", border: "border-orange-500/25",
+        solid: "bg-orange-500 hover:bg-orange-600", grad: "from-orange-500 to-amber-500",
+        hex: "#f97316"
+    }
+};
+
+// رقم النسخة — بيزيد مع كل تحديث. الأونر يقدر يوقف أي نسخة أقدم من min_version
+const APP_VERSION = 212;
+
+const MAX_TXT_SIZE = 10 * 1024 * 1024;
+const MAX_IMG_SIZE = 20 * 1024 * 1024;
+const ALLOWED_IMG_EXT = ["png", "jpg", "jpeg", "webp", "gif"];
+const OCR_MAX_FAILS = 3;
+const OCR_LOCK_MS = 5 * 60 * 1000;
+
+// السماحية في عدد السطور: 3 سطور أو 5% من الـ Valid (الأكبر فيهم)
+function lineTolerance(valid) { return Math.max(3, Math.ceil(valid * 0.05)); }
+
+/* ===================== HELPERS ===================== */
+
+const $ = id => document.getElementById(id);
+
+function safeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+function safeSet(key, v) { try { localStorage.setItem(key, v); } catch (e) { /* ignore */ } }
+
+// أي نص جاي من المستخدم لازم يعدي من هنا قبل innerHTML
+function esc(value) {
+    if (value === null || value === undefined) return "";
+    return String(value)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+// لاستخدام قيمة جوه onclick="fn('...')"
+function arg(value) { return esc(encodeURIComponent(String(value ?? ""))); }
+function unarg(value) { return decodeURIComponent(String(value ?? "")); }
+
+let lang = safeGet("elbob_language") === "en" ? "en" : "ar";
+
+function money(v) {
+    const n = Number(v || 0);
+    return (Number.isInteger(n) ? n.toString() : n.toFixed(2)) + (lang === "en" ? " EGP" : " ج.م");
+}
+
+function toolOf(row) { return row && row.tool_name === "tayeb" ? "tayeb" : "yazeed"; }
+function toolPrice(tool) { return tool === "tayeb" ? S.settings.tPrice : S.settings.yPrice; }
+function isToolClosed(tool) { return tool === "tayeb" ? S.settings.tClosed : S.settings.yClosed; }
+
+function hasVal(v) { return v !== null && v !== undefined && v !== ""; }
+
+// مصدر واحد لحساب سعر أي تسليمة
+function calcPrice(row) {
+    if (!row) return 0;
+    if (hasVal(row.total_price)) return Number(row.total_price) || 0;
+    const unit = hasVal(row.unit_price) ? Number(row.unit_price) : toolPrice(toolOf(row));
+    return Number(row.valid_count || 0) * (Number(unit) || 0);
+}
+
+function calcUnit(row) {
+    if (hasVal(row.unit_price)) return Number(row.unit_price) || 0;
+    const v = Number(row.valid_count || 0);
+    if (hasVal(row.total_price) && v) return Number(row.total_price) / v;
+    return toolPrice(toolOf(row));
+}
+
+const isPaid = s => s.payment_status === "paid";
+const isApprovedUnpaid = s => s.status === "approved" && !isPaid(s);
+const sum = (rows, fn) => rows.reduce((a, r) => a + fn(r), 0);
+
+function profileName(id) {
+    const p = S.workers.find(w => w.id === id) || S.staff.find(w => w.id === id)
+        || (S.me && S.me.id === id ? S.me : null);
+    return p ? (p.full_name || p.username || "—") : "عامل غير معروف";
+}
+
+function friendlyError(error) {
+    const msg = error?.message || "";
+    const code = error?.code || "";
+    if (msg === "Invalid login credentials") return "الإيميل أو الباسورد غلط، أو الحساب لسه ماتأكدش.";
+    if (msg.includes("Email not confirmed")) return "لازم تأكد الإيميل الأول من الرسالة اللي وصلتك.";
+    if (msg.includes("User already registered")) return "الإيميل ده متسجل قبل كده.";
+    if (code === "23505" || msg.includes("duplicate key")) return "❌ الملف ده اتسلّم قبل كده، مينفعش يتسلّم تاني.";
+    if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) return "مشكلة في النت، جرّب تاني.";
+    return msg || "حصل خطأ، جرّب تاني";
+}
+
+function getFileExtension(name) {
+    const parts = String(name || "").split(".");
+    if (parts.length < 2) return "";
+    return parts.pop().toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+/* ===================== DATES (توقيت القاهرة) ===================== */
+
+// يوم الشغل بيبدأ الساعة 6 الصبح مش 12 بالليل:
+// أي تسليمة من 12 بالليل لحد 5:59 الصبح بتتحسب على اليوم اللي قبله
+// (مثلاً تسليم الساعة 1 بالليل يوم 15 = شغل يوم 14). غيّر الرقم لو عايز ساعة تانية.
+const DAY_START_HOUR = 6;
+
+const DAY_NAMES_AR = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+const DAY_NAMES_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const dayName = i => (lang === "en" ? DAY_NAMES_EN : DAY_NAMES_AR)[i];
+
+function cairoParts(value) {
+    const d = value ? new Date(value) : new Date();
+    const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Africa/Cairo", year: "numeric", month: "2-digit", day: "2-digit",
+        weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+    }).formatToParts(d);
+    const g = t => parts.find(p => p.type === t)?.value || "";
+    const wd = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    return { y: g("year"), m: g("month"), d: g("day"), h: g("hour"), min: g("minute"), wd: wd[g("weekday")] ?? 0 };
+}
+
+function dayKey(value) {
+    const t = value ? new Date(value).getTime() : Date.now();
+    const p = cairoParts(t - DAY_START_HOUR * 3600e3);
+    return `${p.y}-${p.m}-${p.d}`;
+}
+function todayKey() { return dayKey(); }
+
+function addDays(key, n) {
+    const [y, m, d] = key.split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
+}
+
+function weekdayOfKey(key) {
+    const [y, m, d] = key.split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+}
+
+function lastFridayKey() {
+    const t = todayKey();
+    return addDays(t, -((weekdayOfKey(t) - 5 + 7) % 7));
+}
+
+function prettyKey(key) {
+    if (!key || key === "all") return "";
+    const [y, m, d] = key.split("-");
+    return `${dayName(weekdayOfKey(key))} ${d}/${m}`;
+}
+
+function fmtDate(value) {
+    if (!value) return "-";
+    const p = cairoParts(value);
+    let h = Number(p.h);
+    const ampm = lang === "en" ? (h >= 12 ? "PM" : "AM") : (h >= 12 ? "م" : "ص");
+    h = h % 12 || 12;
+    return `${dayName(p.wd)} ${p.d}/${p.m} — ${h}:${p.min} ${ampm}`;
+}
+
+function fmtShortDate(value) {
+    const p = cairoParts(value);
+    return `${dayName(p.wd)} ${p.d}/${p.m}/${p.y}`;
+}
+
+/* ===================== THEME ===================== */
+
+let theme = safeGet("elbob_theme") || "dark";
+
+function applyTheme() {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.querySelectorAll(".themeBtn").forEach(b => { b.textContent = theme === "dark" ? "☀️" : "🌙"; });
+}
+
+function toggleTheme() {
+    theme = theme === "dark" ? "light" : "dark";
+    safeSet("elbob_theme", theme);
+    applyTheme();
+}
+
+/* ===================== SOUNDS (Web Audio — من غير ملفات) ===================== */
+
+let audioCtx = null;
+
+function getAudio() {
+    try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        return audioCtx;
+    } catch (e) { return null; }
+}
+
+// المتصفح بيسمح بالصوت بعد أول لمسة — نجهزه من أول تفاعل
+["pointerdown", "keydown", "touchstart"].forEach(ev =>
+    window.addEventListener(ev, () => getAudio(), { once: true, passive: true }));
+
+function tone(freq, start, dur, type = "sine", vol = 0.18) {
+    const ctx = getAudio();
+    if (!ctx) return;
+    const t0 = ctx.currentTime + start;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.05);
+}
+
+const Sound = {
+    success() {           // نغمتين طالعين
+        tone(659, 0, 0.18, "triangle");
+        tone(988, 0.13, 0.35, "triangle");
+    },
+    error() {             // بزّة واطية مرتين
+        tone(160, 0, 0.18, "sawtooth", 0.12);
+        tone(130, 0.22, 0.28, "sawtooth", 0.12);
+    },
+    celebrate() {         // احتفال
+        [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.3, "triangle", 0.16));
+        tone(1319, 0.5, 0.5, "sine", 0.12);
+    },
+    soft() {              // رفض — هادي
+        tone(440, 0, 0.25, "sine", 0.1);
+        tone(349, 0.2, 0.4, "sine", 0.1);
+    },
+    ping() {              // تنبيه للأونر
+        tone(880, 0, 0.12, "sine", 0.14);
+        tone(1175, 0.12, 0.25, "sine", 0.14);
+    },
+    money() {             // دفع
+        [784, 988, 1175, 1568].forEach((f, i) => tone(f, i * 0.08, 0.25, "square", 0.06));
+    }
+};
+
+function confetti(count = 90) {
+    const colors = ["#a855f7", "#f97316", "#22c55e", "#3b82f6", "#eab308", "#ec4899"];
+    for (let i = 0; i < count; i++) {
+        const el = document.createElement("div");
+        el.className = "confetti-piece";
+        el.style.left = Math.random() * 100 + "vw";
+        el.style.background = colors[i % colors.length];
+        el.style.animationDuration = 1.8 + Math.random() * 1.8 + "s";
+        el.style.animationDelay = Math.random() * 0.4 + "s";
+        el.style.transform = `rotate(${Math.random() * 360}deg)`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4200);
+    }
+}
+
+/* ===================== TOAST ===================== */
+
+function toast(message, type = "info") {
+    const c = $("toastContainer");
+    if (!c) return;
+    const cls = {
+        success: "bg-emerald-600 text-white", error: "bg-red-600 text-white",
+        warning: "bg-yellow-400 text-black", info: "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+    };
+    const el = document.createElement("div");
+    el.className = `toast ${cls[type] || cls.info} px-5 py-3 rounded-2xl shadow-xl max-w-sm font-bold text-sm`;
+    el.textContent = message;
+    c.appendChild(el);
+    setTimeout(() => el.remove(), type === "error" ? 6000 : 3500);
+}
+
+/* ===================== MODALS ===================== */
+
+let modalStack = [];
+
+function openModalHtml(innerHtml, { width = "max-w-md", onClose = null, dismissable = true } = {}) {
+    const wrap = document.createElement("div");
+    wrap.className = "fixed inset-0 z-[200] modal-bg flex items-center justify-center p-4";
+    wrap.innerHTML = `<div class="modal-card w-full ${width} max-h-[92vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-white/10 p-6 shadow-2xl">${innerHtml}</div>`;
+    if (dismissable) {
+        wrap.addEventListener("click", e => { if (e.target === wrap) closeTopModal(); });
+    }
+    $("modalRoot").appendChild(wrap);
+    modalStack.push({ el: wrap, onClose, dismissable });
+    return wrap;
+}
+
+function closeTopModal(force = false) {
+    const top = modalStack[modalStack.length - 1];
+    if (!top || (!top.dismissable && !force)) return;
+    modalStack.pop();
+    top.el.remove();
+    if (top.onClose) top.onClose();
+}
+
+function closeAllModals() {
+    while (modalStack.length) closeTopModal(true);
+}
+
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeTopModal(); });
+
+/**
+ * confirmDialog({ title, text, confirmText, confirmClass, input: {label, placeholder, ltr, textarea}, onConfirm })
+ * onConfirm(value) — لو رجّعت false المودال يفضل مفتوح
+ */
+function confirmDialog(opts) {
+    const {
+        title, text = "", confirmText = "تأكيد", confirmClass = "bg-red-600 text-white",
+        input = null, onConfirm, icon = ""
+    } = opts;
+
+    const inputHtml = input ? `
+        <div class="mt-4">
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">${esc(input.label || "")}</label>
+            ${input.textarea
+                ? `<textarea id="dlgInput" rows="2" class="input text-sm" placeholder="${esc(input.placeholder || "")}"></textarea>`
+                : `<input id="dlgInput" class="input ${input.ltr ? "ltr" : ""}" placeholder="${esc(input.placeholder || "")}">`}
+        </div>` : "";
+
+    const m = openModalHtml(`
+        ${icon ? `<div class="text-4xl mb-2">${icon}</div>` : ""}
+        <h3 class="text-xl font-black">${esc(title)}</h3>
+        ${text ? `<p class="text-sm text-slate-500 dark:text-slate-400 mt-3 leading-7" style="white-space:pre-line">${esc(text)}</p>` : ""}
+        ${inputHtml}
+        <div class="flex gap-3 mt-6">
+            <button type="button" data-act="cancel" class="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-white/10 font-bold">إلغاء</button>
+            <button type="button" data-act="ok" class="flex-1 py-3 rounded-2xl font-black ${confirmClass}">${esc(confirmText)}</button>
+        </div>`);
+
+    if (input?.value) m.querySelector("#dlgInput").value = input.value;
+    if (input) setTimeout(() => m.querySelector("#dlgInput")?.focus(), 60);
+
+    m.querySelector('[data-act="cancel"]').onclick = () => closeTopModal(true);
+    const ok = m.querySelector('[data-act="ok"]');
+    ok.onclick = async () => {
+        ok.disabled = true;
+        const value = input ? m.querySelector("#dlgInput").value : undefined;
+        let keepOpen = false;
+        try {
+            const res = await onConfirm?.(value);
+            keepOpen = res === false;
+        } finally {
+            if (keepOpen) ok.disabled = false;
+            else if (modalStack.some(x => x.el === m)) {
+                modalStack = modalStack.filter(x => x.el !== m);
+                m.remove();
+            }
+        }
+    };
+}
+
+/* ===================== IMAGE VIEWER ===================== */
+
+function openImageViewer(url) {
+    $("imageViewerImg").src = url;
+    $("imageViewer").classList.remove("hidden-view");
+}
+function closeImageViewer() {
+    $("imageViewer").classList.add("hidden-view");
+    $("imageViewerImg").removeAttribute("src");
+}
+
+/* ===================== STORAGE FILES ===================== */
+
+async function openStorageFile(bucket, encodedPath) {
+    try {
+        const path = unarg(encodedPath);
+        if (!path) throw new Error("الملف غير موجود");
+        const fileName = path.split("/").pop() || "download";
+        const download = bucket === "work-files";
+
+        const { data, error } = await db.storage.from(bucket)
+            .createSignedUrl(path, 600, download ? { download: fileName } : {});
+        if (error) throw error;
+
+        if (download) {
+            const a = document.createElement("a");
+            a.href = data.signedUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } else {
+            openImageViewer(data.signedUrl);
+        }
+    } catch (e) {
+        console.error(e);
+        toast(friendlyError(e), "error");
+    }
+}
+
+// مصغرات صور الاتشيكر — طلب واحد لكل الصور
+const thumbCache = new Map();
+
+async function loadThumbs(container) {
+    const imgs = [...container.querySelectorAll("img[data-proof]")];
+    const now = Date.now();
+    // الرابط صالح ساعة — بنجدده لو فاضل أقل من 5 دقايق
+    const need = [...new Set(imgs.map(i => i.dataset.proof)
+        .filter(p => !thumbCache.has(p) || thumbCache.get(p).exp < now + 5 * 60e3))];
+
+    if (need.length) {
+        const { data } = await db.storage.from("proofs").createSignedUrls(need, 3600);
+        (data || []).forEach(r => { if (r.signedUrl) thumbCache.set(r.path, { url: r.signedUrl, exp: now + 3600e3 }); });
+    }
+    imgs.forEach(img => {
+        const url = thumbCache.get(img.dataset.proof)?.url;
+        if (url) {
+            img.src = url;
+            img.onclick = () => openImageViewer(url);
+        }
+    });
+}
+
+function copyText(text, okMsg = "اتنسخ ✅") {
+    const done = () => toast(okMsg, "success");
+    if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+    } else fallbackCopy(text, done);
+}
+
+function fallbackCopy(text, done) {
+    const el = document.createElement("textarea");
+    el.value = text;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand("copy");
+    el.remove();
+    done();
+}
+
+/* ===================== COUNT-UP NUMBERS ===================== */
+
+function animateNumbers(root) {
+    root.querySelectorAll("[data-count]").forEach(el => {
+        const target = Number(el.dataset.count) || 0;
+        const isMoney = el.dataset.money === "1";
+        const dur = 600;
+        const start = performance.now();
+        const fmt = v => isMoney ? money(Math.round(v * 100) / 100) : Math.round(v).toString();
+        if (!target) { el.textContent = fmt(0); return; }
+        const step = now => {
+            const p = Math.min(1, (now - start) / dur);
+            const eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = fmt(p < 1 ? target * eased : target);
+            if (p < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+    });
+}
+
+function countSpan(value, isMoney = false, cls = "") {
+    const v = isMoney ? Math.round(Number(value || 0) * 100) / 100 : Number(value || 0);
+    return `<span class="num ${cls}" data-count="${v}" data-money="${isMoney ? 1 : 0}">${isMoney ? money(v) : v}</span>`;
+}
+
+/* ===================== SETTINGS ===================== */
+
+// النسخة دي اتوقفت من الأونر — لازم تتحدث
+let updating = false;
+function forceUpdate() {
+    if (updating) return;
+    updating = true;
+    stopPolling();
+    closeAllModals();
+    openModalHtml(`
+        <div class="text-center">
+            <div class="text-5xl mb-3">🔄</div>
+            <h3 class="text-xl font-black">في نسخة جديدة من الموقع</h3>
+            <p class="text-slate-500 dark:text-slate-400 mt-2">بنحدّث الصفحة دلوقتي...</p>
+        </div>`, { dismissable: false });
+    setTimeout(() => {
+        const u = new URL(location.href);
+        u.searchParams.set("v", Date.now());
+        location.replace(u.toString());
+    }, 1500);
+}
+
+async function loadSettings() {
+    const { data, error } = await db.from("site_settings").select("*").eq("id", 1).maybeSingle();
+    if (error) { console.error(error); return; }
+    if (Number(data?.min_version || 0) > APP_VERSION) return forceUpdate();
+    S.settings = {
+        closed: !!data?.is_closed,
+        yClosed: !!data?.is_yazeed_closed,
+        tClosed: !!data?.is_tayeb_closed,
+        yPrice: Number(data?.yazeed_price ?? data?.valid_price ?? 0),
+        tPrice: Number(data?.tayeb_price ?? data?.valid_price ?? 0)
+    };
+}
+
+/* ===================== DATA ===================== */
+
+// Supabase بيرجّع أقصى 1000 صف في الطلب — بنجيب الباقي صفحة صفحة عشان مفيش تسليمة تختفي
+async function fetchAll(makeQuery, pageSize = 1000) {
+    const all = [];
+    for (let from = 0; ; from += pageSize) {
+        const { data, error } = await makeQuery().range(from, from + pageSize - 1);
+        if (error) return { data: null, error };
+        all.push(...(data || []));
+        if (!data || data.length < pageSize) return { data: all, error: null };
+    }
+}
+
+async function loadData() {
+    const role = S.me?.role;
+    if (!role) return;
+
+    if (role === "worker") {
+        const { data, error } = await fetchAll(() => db.from("submissions").select("*")
+            .eq("worker_id", S.user.id).order("created_at", { ascending: false }).order("id"));
+        if (error) return toast(friendlyError(error), "error");
+        S.subs = data || [];
+        return;
+    }
+
+    const [w, st, s] = await Promise.all([
+        db.from("profiles").select("*").eq("role", "worker").order("created_at", { ascending: false }),
+        db.from("profiles").select("id, full_name, username, role").in("role", ["owner", "supervisor"]),
+        fetchAll(() => db.from("submissions").select("*").order("created_at", { ascending: false }).order("id"))
+    ]);
+    if (w.error) return toast(friendlyError(w.error), "error");
+    if (s.error) return toast(friendlyError(s.error), "error");
+    S.workers = w.data || [];
+    S.staff = st.data || [];
+    S.subs = s.data || [];
+}
+
+/* ===================== AUTH UI ===================== */
+
+function showAuthMode(mode) {
+    const on = "py-3 rounded-2xl bg-black text-white dark:bg-white dark:text-black font-bold";
+    const off = "py-3 rounded-2xl bg-slate-100 dark:bg-white/5 font-bold";
+    const isLogin = mode === "login";
+    $("loginForm").classList.toggle("hidden-view", !isLogin);
+    $("registerForm").classList.toggle("hidden-view", isLogin);
+    $("loginTab").className = isLogin ? on : off;
+    $("registerTab").className = isLogin ? off : on;
+}
+
+function showAuthScreen() {
+    stopPolling();
+    closeAllModals();
+    $("appShell").classList.add("hidden-view");
+    $("authScreen").classList.remove("hidden-view");
+    document.title = "DARK ZONE";
+    showAuthMode("login");
+}
+
+function setLoading(btn, text) {
+    btn.disabled = true;
+    btn.innerHTML = `<span class="inline-flex items-center gap-2"><span class="loader"></span>${esc(text)}</span>`;
+}
+
+function togglePasswordVisibility(id, btn) {
+    const input = $(id);
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    btn.textContent = show ? "🙈" : "👁";
+}
+
+// بنقول للمتصفح يحفظ/يحدّث الباسورد الصح (Chrome و Edge) —
+// عشان بعد تغيير الباسورد مايفضلش يكتب القديم لوحده
+function saveBrowserPassword(email, password) {
+    try {
+        if (!window.PasswordCredential || !navigator.credentials?.store || !email || !password) return;
+        navigator.credentials.store(new PasswordCredential({ id: email, password, name: S.me?.full_name || email })).catch(() => {});
+    } catch (e) { /* مش مدعوم */ }
+}
+
+async function login(e) {
+    e.preventDefault();
+    const btn = $("loginSubmit");
+    // المتصفح ساعات بيحط مسافات أو حروف كابيتال أو حروف مخفية مع الإيميل المحفوظ
+    const email = $("loginEmail").value.replace(/[\s​-‏‪-‮⁦-⁩]/g, "").toLowerCase();
+    const password = $("loginPassword").value;
+    $("loginEmail").value = email;
+
+    if (!email || !password) return toast("اكتب الإيميل والباسورد", "warning");
+    if (!email.includes("@")) {
+        return toast("اكتب الإيميل نفسه، مش اسم المستخدم (المتصفح ساعات بيحط اليوزر مكانه)", "warning");
+    }
+
+    setLoading(btn, "جاري الدخول...");
+    try {
+        const { data, error } = await db.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        S.user = data.user;
+        try { saveBrowserPassword(email, password); } catch (e) { /* مش هيوقف الدخول */ }
+        await enterApp(true);
+    } catch (err) {
+        console.error(err);
+        if (err?.message === "Invalid login credentials") {
+            Sound.error();
+            $("loginForm").closest(".card")?.classList.remove("shake");
+            void $("loginForm").offsetWidth;
+            $("loginForm").closest(".card")?.classList.add("shake");
+            const pass = $("loginPassword");
+            pass.value = "";
+            pass.focus();
+            toast("❌ الإيميل أو الباسورد غلط — اكتب الباسورد تاني", "error");
+        } else {
+            toast(friendlyError(err), "error");
+        }
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "دخول";
+    }
+}
+
+const USERNAME_RE = /^[a-zA-Z0-9_.]{3,30}$/;
+const CASH_RE = /^01[0125][0-9]{8}$/;
+
+async function register(e) {
+    e.preventDefault();
+    const full_name = $("regName").value.trim();
+    const username = $("regUsername").value.trim();
+    const cash_number = $("regCash").value.trim();
+    const email = $("regEmail").value.trim();
+    const password = $("regPassword").value;
+
+    if (full_name.length < 2 || /[<>]/.test(full_name)) return toast("اكتب اسمك صح (من غير رموز)", "warning");
+    if (!USERNAME_RE.test(username)) return toast("اسم المستخدم: حروف إنجليزي وأرقام و _ و . بس (من 3 لـ 30)", "warning");
+    if (!CASH_RE.test(cash_number)) return toast("رقم الكاش لازم يكون 11 رقم ويبدأ بـ 010 / 011 / 012 / 015", "warning");
+
+    const btn = $("registerSubmit");
+    setLoading(btn, "جاري إنشاء الحساب...");
+    try {
+        const { data, error } = await db.auth.signUp({
+            email, password, options: { data: { full_name, username, cash_number } }
+        });
+        if (error) throw error;
+        if (data.session) {
+            S.user = data.user;
+            toast("تم إنشاء الحساب بنجاح ✅", "success");
+            await enterApp(true);
+        } else {
+            toast("تم إنشاء الحساب! راجع إيميلك عشان تفعّله، وبعدها سجّل دخول.", "success");
+            showAuthMode("login");
+            $("loginEmail").value = email;
+        }
+    } catch (err) {
+        console.error(err);
+        toast(friendlyError(err), "error");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "إنشاء الحساب";
+    }
+}
+
+function forgotPasswordPrompt() {
+    openModalHtml(`
+        <div class="text-center">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-cyan-500/10 flex items-center justify-center text-3xl mb-4">🔑</div>
+            <h3 class="text-xl font-black">نسيت كلمة المرور؟</h3>
+            <p class="text-slate-500 dark:text-slate-400 mt-3 leading-7">
+                ولا يهمك 👌<br>كلّم الأدمن، وهو هيعملك باسورد جديد على طول.
+            </p>
+            <button type="button" onclick="closeTopModal(true)" class="w-full mt-6 py-3 rounded-2xl bg-black text-white dark:bg-white dark:text-black font-black">تمام</button>
+        </div>`);
+}
+
+/* ===================== SESSION / ENTER ===================== */
+
+async function loadProfile() {
+    const { data, error } = await db.rpc("get_my_profile");
+    if (!error && data) {
+        const p = Array.isArray(data) ? data[0] : data;
+        if (p) { S.me = p; return true; }
+    }
+    const r = await db.from("profiles").select("*").eq("id", S.user.id).maybeSingle();
+    if (r.error) { toast(friendlyError(r.error), "error"); return false; }
+    S.me = r.data;
+    return !!S.me;
+}
+
+async function enterApp(freshLogin = false) {
+    const ok = await loadProfile();
+    if (!ok || S.me.active === false) {
+        if (S.me?.active === false) toast("الحساب ده متعطل من الإدارة.", "error");
+        await db.auth.signOut();
+        S.user = null; S.me = null;
+        showAuthScreen();
+        return;
+    }
+
+    await Promise.all([loadSettings(), loadData()]);
+    S.loaded = true;
+
+    $("authScreen").classList.add("hidden-view");
+    $("appShell").classList.remove("hidden-view");
+
+    const roleNames = { owner: "👑 الأونر", supervisor: "🧑‍💼 مشرف", worker: "👷 موظف" };
+    $("sideRole").textContent = roleNames[S.me.role] || "";
+    $("sideName").textContent = S.me.full_name || "-";
+    $("sideUser").textContent = "@" + (S.me.username || "-");
+    $("sideAvatar").textContent = (S.me.full_name || "?").trim().charAt(0) || "?";
+
+
+    try {
+        if (S.me.role === "worker") initWorkerNotifications();
+        if (S.me.role !== "worker") S.lastPendingCount = S.subs.filter(s => s.status === "pending").length;
+
+        if (!location.hash || !routeAllowed(parseRoute().name)) {
+            location.replace("#/" + defaultRoute());
+        }
+        renderRoute();
+    } catch (e) {
+        console.error(e);
+        toast("حصل خطأ في عرض الصفحة: " + (e?.message || e), "error");
+    }
+    startPolling();
+}
+
+async function checkExistingSession() {
+    try {
+        const { data, error } = await db.auth.getSession();
+        if (error) throw error;
+        if (!data.session) return showAuthScreen();
+        S.user = data.session.user;
+        await enterApp();
+    } catch (e) {
+        console.error(e);
+        showAuthScreen();
+    }
+}
+
+async function logout(silent = false) {
+    stopPolling();
+    await db.auth.signOut();
+    Object.assign(S, { user: null, me: null, subs: [], workers: [], staff: [], loaded: false });
+    thumbCache.clear();
+    history.replaceState(null, "", location.pathname);
+    showAuthScreen();
+    $("loginForm").reset();
+    if (silent !== true) toast("تم تسجيل الخروج 👋", "success");
+}
+
+/* ===================== ROUTER ===================== */
+
+const NAV = {
+    worker: [
+        { name: "yazeed", label: "تسليم يزيد", short: "يزيد", icon: "🟣", accent: TOOLS.yazeed.hex },
+        { name: "tayeb", label: "تسليم الطيب", short: "الطيب", icon: "⚡", accent: TOOLS.tayeb.hex },
+        { name: "money", label: "مستحقاتي وحسابي", short: "مستحقاتي", icon: "💰", accent: "#10b981" }
+    ],
+    owner: [
+        { name: "home", label: "نظرة عامة", short: "الرئيسية", icon: "🏠", accent: "#6366f1" },
+        { name: "yazeed", label: "أداة يزيد", short: "يزيد", icon: "🟣", accent: TOOLS.yazeed.hex, badge: "yazeed" },
+        { name: "tayeb", label: "أداة الطيب", short: "الطيب", icon: "⚡", accent: TOOLS.tayeb.hex, badge: "tayeb" },
+        { name: "workers", label: "الموظفين", short: "الموظفين", icon: "👥", accent: "#0ea5e9" },
+        { name: "payments", label: "المدفوعات والتقفيل", short: "المدفوعات", icon: "💰", accent: "#10b981" }
+    ],
+    supervisor: [
+        { name: "yazeed", label: "مراجعة يزيد", short: "يزيد", icon: "🟣", accent: TOOLS.yazeed.hex, badge: "yazeed" },
+        { name: "tayeb", label: "مراجعة الطيب", short: "الطيب", icon: "⚡", accent: TOOLS.tayeb.hex, badge: "tayeb" }
+    ]
+};
+
+function parseRoute() {
+    const parts = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
+    return { name: parts[0] || "", param: parts[1] ? decodeURIComponent(parts[1]) : null };
+}
+
+function routeAllowed(name) {
+    const role = S.me?.role;
+    if (role === "owner" && name === "worker") return true;
+    return (NAV[role] || []).some(n => n.name === name);
+}
+
+function defaultRoute() {
+    const role = S.me?.role;
+    if (role === "owner") return "home";
+    if (role === "worker" && S.settings.yClosed && !S.settings.tClosed) return "tayeb";
+    return "yazeed";
+}
+
+function go(path) {
+    if (location.hash === "#/" + path) renderRoute();
+    else location.hash = "#/" + path;
+}
+
+window.addEventListener("hashchange", () => { if (S.loaded) renderRoute(); });
+
+function pendingCountFor(tool) {
+    return S.subs.filter(s => s.status === "pending" && toolOf(s) === tool).length;
+}
+
+function renderNav(active) {
+    const items = NAV[S.me.role] || [];
+    const accent = (items.find(i => i.name === active) || items[0])?.accent || "#6366f1";
+    const badge = it => {
+        if (!it.badge) return "";
+        const n = pendingCountFor(it.badge);
+        return n ? `<span class="nav-badge num">${n}</span>` : "";
+    };
+
+    $("sideNav").innerHTML = items.map(it => {
+        const isActive = it.name === active || (active === "worker" && it.name === "workers");
+        return `<a href="#/${it.name}" class="nav-item ${isActive ? "active" : ""}" style="${isActive ? `background:${it.accent}` : ""}">
+            <span class="text-lg">${it.icon}</span><span>${esc(it.label)}</span>${badge(it)}
+        </a>`;
+    }).join("");
+
+    $("bottomNav").style.setProperty("--accent", accent);
+    $("bottomNav").innerHTML = items.map(it => {
+        const isActive = it.name === active || (active === "worker" && it.name === "workers");
+        return `<a href="#/${it.name}" class="bnav-item ${isActive ? "active" : ""}">
+            <span class="ico">${it.icon}</span><span>${esc(it.short)}</span>${badge(it)}
+        </a>`;
+    }).join("");
+
+    // عدّاد التسليمات المعلقة على اسم التاب
+    if (S.me.role !== "worker") {
+        const n = S.subs.filter(s => s.status === "pending").length;
+        document.title = n ? `(${n}) DARK ZONE` : "DARK ZONE";
+    }
+}
+
+function renderRoute() {
+    if (!S.me) return;
+    let { name, param } = parseRoute();
+    if (!routeAllowed(name)) {
+        location.replace("#/" + defaultRoute());
+        return;
+    }
+
+    // الموظف والموقع مقفول
+    if (S.me.role === "worker" && S.settings.closed) {
+        renderNav(name);
+        mountPage(maintenanceHtml());
+        return;
+    }
+
+    const page = PAGES[S.me.role]?.[name];
+    if (!page) return;
+
+    renderNav(name);
+    mountPage(page.render(param), page.after, param);
+    window.scrollTo(0, 0);
+}
+
+function mountPage(html, after, param) {
+    const root = $("page");
+    root.innerHTML = `<div class="page-enter">${html}</div>`;
+    animateNumbers(root);
+    loadThumbs(root);
+    if (after) after(root, param);
+}
+
+// تحديث الصفحة بالبيانات الجديدة من غير ما نبوّظ اللي المستخدم بيكتبه
+function refreshCurrentPage() {
+    if (!S.me) return;
+    const { name, param } = parseRoute();
+    const page = PAGES[S.me.role]?.[name];
+
+    if (S.me.role === "worker" && S.settings.closed) return renderRoute();
+
+    renderNav(name);
+    if (page?.live) {
+        page.live(param);
+        return;
+    }
+    const typing = ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName);
+    if (modalStack.length || typing || page?.noAutoRefresh) return;
+    const y = window.scrollY;
+    mountPage(page.render(param), page.after, param);
+    window.scrollTo(0, y);
+}
+
+function maintenanceHtml() {
+    return `
+    <div class="min-h-[60vh] flex items-center justify-center">
+        <div class="card max-w-lg w-full p-8 md:p-12 text-center">
+            <div class="mx-auto w-24 h-24 rounded-[30px] bg-red-500/10 flex items-center justify-center text-5xl mb-6">🔒</div>
+            <h2 class="text-3xl font-black">الموقع مغلق مؤقتًا</h2>
+            <p class="text-slate-500 dark:text-slate-400 mt-4 leading-8">الموقع متوقف حاليًا لفترة مؤقتة، وهيرجع يشتغل أول ما الإدارة تفتحه.</p>
+            <p class="text-xs text-slate-400 mt-6">الصفحة بتتحدث لوحدها ✨</p>
+        </div>
+    </div>`;
+}
+
+/* ===================== POLLING ===================== */
+
+function startPolling() {
+    stopPolling();
+    S.timers.push(setInterval(pollTick, 30000));
+}
+
+function stopPolling() {
+    S.timers.forEach(clearInterval);
+    S.timers = [];
+}
+
+async function pollTick() {
+    if (!S.me || S.submitting) return;
+
+    // لو الحساب اتعطل وهو فاتح
+    const { data: p } = await db.from("profiles").select("active").eq("id", S.user.id).maybeSingle();
+    if (p && p.active === false) {
+        toast("الحساب ده اتعطل من الإدارة.", "error");
+        return logout(true);
+    }
+
+    await Promise.all([loadSettings(), loadData()]);
+
+    if (S.me.role === "worker") {
+        checkWorkerNotifications();
+    } else {
+        const n = S.subs.filter(s => s.status === "pending").length;
+        if (n > (S.lastPendingCount || 0)) {
+            Sound.ping();
+            toast(`🔔 وصلت ${n - (S.lastPendingCount || 0)} تسليمة جديدة`, "info");
+        }
+        S.lastPendingCount = n;
+    }
+    refreshCurrentPage();
+}
+
+/* ===================== DAILY SALAWAT ===================== */
+
+// بتظهر أول ما الموقع يتفتح — مرة واحدة في اليوم (بتوقيت مصر) على كل جهاز
+// الصلاة على النبي ﷺ وجمعة مباركة ماشيين على اليوم الحقيقي (من 12 بالليل)، مش يوم الشغل
+function salawatKey() { const p = cairoParts(); return `dz_salawat_day_${p.y}-${p.m}-${p.d}`; }
+
+function checkDailySalawat() {
+    if (safeGet(salawatKey())) return;
+    const friday = cairoParts().wd === 5;
+    $("salawatIcon").textContent = friday ? "🕌" : "🌸";
+    $("salawatTitle").textContent = friday ? "جمعة مباركة طيبة" : "عطّر لسانك بذكر الله";
+    $("salawatText").textContent = friday
+        ? "خَيْرُ يَوْمٍ طَلَعَتْ عَلَيْهِ الشَّمْسُ.. أَكْثِرُوا مِنَ الصَّلَاةِ وَالسَّلَامِ عَلَى سَيِّدِنَا مُحَمَّدٍ ﷺ 🤍\nوماتنساش سورة الكهف 📖"
+        : "اللَّهُمَّ صَلِّ وَسَلِّمْ وَبَارِكْ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِهِ وَصَحْبِهِ أَجْمَعِينَ 🤍";
+    $("salawatModal").classList.remove("hidden-view");
+}
+
+function confirmSalawat() {
+    safeSet(salawatKey(), "1");
+    $("salawatModal").classList.add("hidden-view");
+    toast("تقبل الله منا ومنكم صالح الأعمال 🤍", "success");
+}
+
+/* ===================== SHARED UI PIECES ===================== */
+
+function statusBadge(row) {
+    if (row.status === "approved") return `<span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-black">✅ مقبول</span>`;
+    if (row.status === "rejected") return `<span class="px-2.5 py-1 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-black">❌ مرفوض</span>`;
+    return `<span class="px-2.5 py-1 rounded-full bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 text-xs font-black">⏳ قيد المراجعة</span>`;
+}
+
+function payBadge(row) {
+    if (isPaid(row)) return `<span class="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 text-xs font-black">💵 تم الدفع</span>`;
+    if (row.status === "approved") return `<span class="px-2.5 py-1 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-black">🧾 قيد الحساب</span>`;
+    return "";
+}
+
+function toolBadge(row) {
+    const t = TOOLS[toolOf(row)];
+    return `<span class="px-2.5 py-1 rounded-full ${t.bg} ${t.text} text-xs font-black">${t.icon} ${t.name}</span>`;
+}
+
+function fileButtons(row, small = true) {
+    const cls = small
+        ? "px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-xs font-black"
+        : "px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-white/10 font-bold text-sm";
+    let h = "";
+    if (row.work_file) h += `<button type="button" onclick="openStorageFile('work-files','${arg(row.work_file)}')" class="${cls}">📄 TXT</button>`;
+    if (row.proof_image) h += `<button type="button" onclick="openStorageFile('proofs','${arg(row.proof_image)}')" class="${cls}">🖼️ Checker</button>`;
+    return h;
+}
+
+function reviewedByLine(row) {
+    if (!row.reviewed_by || row.status === "pending") return "";
+    const verb = row.status === "approved" ? "اتقبلت بواسطة الإدارة" : "اترفضت بواسطة الإدارة";
+    return `<p class="text-[11px] text-slate-400 mt-1">${verb}${row.reviewed_at ? " — " + fmtDate(row.reviewed_at) : ""}</p>`;
+}
+
+function statCard({ label, value, money: isMoney = false, sub = "", tone = "slate", icon = "" }) {
+    const tones = {
+        slate: "bg-white dark:bg-white/[.035] border-slate-200 dark:border-white/10",
+        purple: "bg-purple-500/10 border-purple-500/20",
+        orange: "bg-orange-500/10 border-orange-500/20",
+        emerald: "bg-emerald-500/10 border-emerald-500/20",
+        sky: "bg-sky-500/10 border-sky-500/20",
+        yellow: "bg-yellow-500/10 border-yellow-500/20",
+        red: "bg-red-500/10 border-red-500/20"
+    };
+    const text = {
+        slate: "", purple: "text-purple-500", orange: "text-orange-500", emerald: "text-emerald-500",
+        sky: "text-sky-500", yellow: "text-yellow-500", red: "text-red-500"
+    };
+    return `
+    <div class="rounded-3xl border p-4 md:p-5 ${tones[tone]}">
+        <div class="flex items-center justify-between gap-2">
+            <p class="text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400">${esc(label)}</p>
+            ${icon ? `<span class="text-lg opacity-80">${icon}</span>` : ""}
+        </div>
+        <p class="text-2xl md:text-3xl font-black mt-2 ${text[tone]}">${countSpan(value, isMoney)}</p>
+        ${sub ? `<p class="text-[11px] text-slate-400 mt-1">${sub}</p>` : ""}
+    </div>`;
+}
+
+function pageHeader(title, subtitle = "", right = "") {
+    return `
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-black">${title}</h1>
+            ${subtitle ? `<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">${subtitle}</p>` : ""}
+        </div>
+        ${right ? `<div class="flex flex-wrap items-center gap-2">${right}</div>` : ""}
+    </div>`;
+}
+
+function emptyBox(text, icon = "📦") {
+    return `<div class="text-center py-12 rounded-3xl border border-dashed border-slate-300 dark:border-white/10">
+        <div class="text-4xl mb-2">${icon}</div><p class="font-bold text-slate-500">${esc(text)}</p></div>`;
+}
+
+// رسم بياني بسيط بالأعمدة (SVG من غير مكتبات)
+function barChart(days, series) {
+    // series: [{key, color, label, values: [n per day]}]
+    const max = Math.max(1, ...days.map((_, i) => sum(series, s => s.values[i])));
+    const best = days.map((_, i) => sum(series, s => s.values[i])).indexOf(max);
+    const cols = days.map((d, i) => {
+        const total = sum(series, s => s.values[i]);
+        let stack = "";
+        series.forEach(s => {
+            const h = (s.values[i] / max) * 100;
+            if (h > 0) stack += `<div class="bar w-full" style="height:${h}%;background:${s.color}" title="${esc(s.label)}: ${s.values[i]}"></div>`;
+        });
+        const isBest = total > 0 && i === best;
+        return `
+        <div class="flex-1 min-w-0 flex flex-col items-center gap-1">
+            <span class="text-[10px] font-black num ${isBest ? "text-emerald-500" : "text-slate-400"}">${total || ""}${isBest ? " 🔥" : ""}</span>
+            <div class="w-full max-w-[34px] h-32 md:h-40 flex flex-col-reverse rounded-lg overflow-hidden bg-slate-200/60 dark:bg-white/5">${stack}</div>
+            <span class="text-[10px] text-slate-400 font-bold truncate w-full text-center">${d.label}</span>
+        </div>`;
+    }).join("");
+    const legend = series.length > 1 ? `<div class="flex gap-4 mt-3 text-xs font-bold">${series.map(s =>
+        `<span class="flex items-center gap-1.5"><i class="w-3 h-3 rounded" style="background:${s.color}"></i>${esc(s.label)}</span>`).join("")}</div>` : "";
+    return `<div class="flex items-end gap-1.5 md:gap-2">${cols}</div>${legend}`;
+}
+
+function lastNDays(n) {
+    const t = todayKey();
+    return Array.from({ length: n }, (_, i) => {
+        const key = addDays(t, i - n + 1);
+        const [, m, d] = key.split("-");
+        return { key, label: i === n - 1 ? "النهاردة" : `${Number(d)}/${Number(m)}` };
+    });
+}
+
+/* ===================== INIT ===================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+    applyTheme();
+    showAuthMode("login");
+    checkDailySalawat();
+    checkExistingSession();
+});
+
+/* =========================================================
+   PAGES REGISTRY
+========================================================= */
+
+const PAGES = { worker: {}, owner: {}, supervisor: {} };
+
+/* =========================================================
+   WORKER — تسليم يزيد / تسليم الطيب
+========================================================= */
+
+const ENCOURAGE = [
+    "تسلم إيدك يا بطل 💪 شغلك وصل",
+    "ربنا يباركلك في تعبك 🤍 كمّل كده",
+    "إنت كده ماشي صح 🔥 عاش",
+    "شغل نضيف ومظبوط 👌 تسلم",
+    "مجهودك محسوب ومتقدّر 🖤",
+    "كل تسليمة بتقربك لهدفك 🚀",
+    "عاش يا وحش 🦁 كمّل على كده",
+    "تعبك مش هيروح على الفاضي 💎"
+];
+
+function workerToolSubs(tool) {
+    const weekAgo = Date.now() - 7 * 86400e3;
+    return S.subs.filter(s => toolOf(s) === tool && !isPaid(s) &&
+        (s.status !== "rejected" || new Date(s.created_at).getTime() > weekAgo));
+}
+
+function workerToolStatsHtml(tool) {
+    const rows = S.subs.filter(s => toolOf(s) === tool && !isPaid(s));
+    const due = rows.filter(s => s.status === "approved");
+    const pending = rows.filter(s => s.status === "pending");
+    const t = todayKey();
+    const lockedToday = sum(S.subs.filter(s => toolOf(s) === tool && dayKey(s.created_at) === t), s => Number(s.locked_count || 0));
+    const tone = tool === "tayeb" ? "orange" : "purple";
+
+    return `
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        ${statCard({ label: "مستحقك (قيد الحساب)", value: sum(due, calcPrice), money: true, tone: "emerald", icon: "💰", sub: "اتقبل ولسه ماتدفعش" })}
+        ${statCard({ label: "Valid قيد الحساب", value: sum(due, s => Number(s.valid_count || 0)), tone, icon: TOOLS[tool].icon })}
+        ${statCard({ label: "قيد المراجعة", value: sum(pending, calcPrice), money: true, tone: "yellow", icon: "⏳", sub: `${pending.length} تسليمة مستنية المراجعة` })}
+        ${statCard({ label: "Locked النهاردة", value: lockedToday, icon: "🔒" })}
+    </div>`;
+}
+
+function workerSubRow(row) {
+    return `
+    <div class="card p-4 md:p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">${statusBadge(row)} ${payBadge(row)}</div>
+                <p class="text-xs text-slate-500 mt-2">📅 ${fmtDate(row.created_at)}</p>
+            </div>
+            <div class="flex items-center gap-4 text-center">
+                <div><p class="text-[11px] text-slate-500">Valid</p><p class="font-black text-emerald-500 num">${Number(row.valid_count || 0)}</p></div>
+                <div><p class="text-[11px] text-slate-500">Locked</p><p class="font-black text-yellow-500 num">${Number(row.locked_count || 0)}</p></div>
+                <div><p class="text-[11px] text-slate-500">المبلغ</p><p class="font-black num">${money(calcPrice(row))}</p></div>
+            </div>
+        </div>
+        ${row.owner_note ? `<div class="mt-3 rounded-2xl bg-slate-100 dark:bg-black/25 p-3 text-sm"><span class="text-xs text-slate-500">ملاحظة الإدارة: </span><b>${esc(row.owner_note)}</b></div>` : ""}
+        <div class="flex flex-wrap gap-2 mt-3">${fileButtons(row)}</div>
+    </div>`;
+}
+
+function workerToolListHtml(tool) {
+    const rows = workerToolSubs(tool);
+    if (!rows.length) return emptyBox("مفيش تسليمات حالية — ابعت أول تسليمة وابدأ 🔥");
+    return `<div class="space-y-3">${rows.map(workerSubRow).join("")}</div>`;
+}
+
+function renderWorkerTool(tool) {
+    const t = TOOLS[tool];
+    const closed = isToolClosed(tool);
+
+    const form = closed ? `
+        <div class="card p-8 text-center">
+            <div class="text-5xl mb-3">🔒</div>
+            <h3 class="text-xl font-black">${t.full} متوقفة مؤقتاً</h3>
+            <p class="text-slate-500 mt-2">هتفتح تاني أول ما الإدارة تشغّلها، والصفحة بتتحدث لوحدها.</p>
+        </div>` : `
+        <form id="submitForm" onsubmit="submitWork(event,'${tool}')" class="card p-5 md:p-7 space-y-5">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <h3 class="text-xl font-black">تسليم شغل جديد</h3>
+                    <p class="text-sm text-slate-500 mt-0.5">كل تسليمة بتقربك لهدفك 🔥</p>
+                </div>
+                <span class="px-3 py-1.5 rounded-xl ${t.bg} ${t.text} font-black text-sm">${t.icon} ${t.name}</span>
+            </div>
+
+            <div id="lockBox" class="hidden-view px-4 py-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-500 font-bold text-sm text-center"></div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block mb-2 font-bold text-sm">Valid Count</label>
+                    <input id="validCount" type="number" min="0" step="1" inputmode="numeric" required class="input ltr text-lg" placeholder="0">
+                </div>
+                <div>
+                    <label class="block mb-2 font-bold text-sm">Locked Count</label>
+                    <input id="lockedCount" type="number" min="0" step="1" inputmode="numeric" required class="input ltr text-lg" placeholder="0">
+                </div>
+            </div>
+
+            <div>
+                <label class="block mb-2 font-bold text-sm">📄 ملف TXT</label>
+                <input id="workFile" type="file" accept=".txt,text/plain" required class="input text-sm cursor-pointer">
+            </div>
+
+            <div>
+                <div class="flex items-center justify-between mb-2 gap-2">
+                    <label class="font-bold text-sm">🖼️ صورة الـ Checker</label>
+                    <span class="text-[11px] font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-xl">📋 تقدر تلصق سكرين (Ctrl + V)</span>
+                </div>
+                <input id="proofFile" type="file" accept="image/*" required onchange="onProofChange(event)" class="input text-sm cursor-pointer">
+                <div id="proofPreviewBox" class="hidden-view mt-3 p-3 rounded-2xl bg-slate-100 dark:bg-black/20 text-center">
+                    <div class="flex items-center justify-between mb-2 px-1">
+                        <span class="text-xs text-slate-400 font-bold">المعاينة:</span>
+                        <button type="button" onclick="clearProof()" class="text-xs text-red-400 font-bold">إلغاء ✖</button>
+                    </div>
+                    <img id="proofPreview" class="max-h-56 mx-auto rounded-xl object-contain" alt="Checker">
+                </div>
+            </div>
+
+            <button id="submitBtn" class="w-full py-4 rounded-2xl text-white font-black text-lg bg-gradient-to-r ${t.grad} shadow-lg active:scale-[.99] transition">
+                إرسال التسليمة ${t.icon}
+            </button>
+        </form>`;
+
+    return `
+    <div data-closed="${closed ? 1 : 0}" id="workerToolPage">
+        <div class="rounded-3xl p-6 md:p-8 mb-6 text-white bg-gradient-to-br ${t.grad} shadow-xl relative overflow-hidden">
+            <div class="absolute -left-6 -top-6 text-[120px] opacity-15 leading-none select-none">${t.icon}</div>
+            <p class="text-white/80 font-bold">أهلاً ${esc(S.me.full_name || "")} 👋</p>
+            <h1 class="text-3xl md:text-4xl font-black mt-1">${t.full}</h1>
+            <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/15 font-black">
+                سعر الـ Valid النهاردة: <span class="num">${money(toolPrice(tool))}</span>
+            </div>
+        </div>
+
+        <div id="toolStats" class="mb-6">${workerToolStatsHtml(tool)}</div>
+
+        <div class="grid lg:grid-cols-5 gap-6">
+            <div class="lg:col-span-2">${form}</div>
+            <div class="lg:col-span-3">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-black">تسليماتي الحالية على ${t.name}</h3>
+                    <a href="#/money" class="text-xs font-bold text-emerald-500">الأرشيف والمدفوعات ←</a>
+                </div>
+                <div id="toolList">${workerToolListHtml(tool)}</div>
+            </div>
+        </div>
+    </div>`;
+}
+
+function workerToolLive(tool) {
+    const page = $("workerToolPage");
+    const closedNow = isToolClosed(tool) ? "1" : "0";
+    const formUntouched = !$("submitForm") || (!$("workFile")?.files.length && !$("proofFile")?.files.length && !$("validCount")?.value);
+    if (page && page.dataset.closed !== closedNow && formUntouched && !S.submitting) {
+        mountPage(renderWorkerTool(tool), (root) => afterWorkerTool(root), null);
+        return;
+    }
+    const stats = $("toolStats");
+    const list = $("toolList");
+    if (stats) { stats.innerHTML = workerToolStatsHtml(tool); animateNumbers(stats); }
+    if (list) list.innerHTML = workerToolListHtml(tool);
+}
+
+function afterWorkerTool() { updateLockUI(); }
+
+PAGES.worker.yazeed = { render: () => renderWorkerTool("yazeed"), after: afterWorkerTool, live: () => workerToolLive("yazeed") };
+PAGES.worker.tayeb = { render: () => renderWorkerTool("tayeb"), after: afterWorkerTool, live: () => workerToolLive("tayeb") };
+
+/* ---------- صورة الاتشيكر: اختيار / لصق / معاينة ---------- */
+
+let previewUrl = null;
+
+function showProof(file) {
+    const box = $("proofPreviewBox");
+    if (!box) return;
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = file ? URL.createObjectURL(file) : null;
+    box.classList.toggle("hidden-view", !previewUrl);
+    if (previewUrl) $("proofPreview").src = previewUrl;
+}
+
+function onProofChange(e) { showProof(e.target.files?.[0] || null); }
+
+function clearProof() {
+    if ($("proofFile")) $("proofFile").value = "";
+    showProof(null);
+}
+
+document.addEventListener("paste", e => {
+    if (!$("proofFile")) return;
+    const items = (e.clipboardData || window.clipboardData)?.items || [];
+    for (const item of items) {
+        if (!item.type.startsWith("image/")) continue;
+        const blob = item.getAsFile();
+        if (!blob) continue;
+        const ext = blob.type.split("/")[1] || "png";
+        const file = new File([blob], `checker_${Date.now()}.${ext}`, { type: blob.type });
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        $("proofFile").files = dt.files;
+        showProof(file);
+        toast("📋 تم لصق السكرين بنجاح", "success");
+        break;
+    }
+});
+
+/* ---------- قفل 5 دقايق بعد 3 محاولات غلط ---------- */
+
+function lockKey() { return "dz_ocr2_" + (S.user?.id || ""); }
+
+function getLock() {
+    try { return JSON.parse(safeGet(lockKey()) || "{}"); } catch (e) { return {}; }
+}
+
+function setLock(v) { safeSet(lockKey(), JSON.stringify(v)); }
+
+function lockRemaining() {
+    const l = getLock();
+    return l.until && l.until > Date.now() ? l.until - Date.now() : 0;
+}
+
+let lockTimer = null;
+
+function updateLockUI() {
+    clearInterval(lockTimer);
+    const tick = () => {
+        const box = $("lockBox");
+        const btn = $("submitBtn");
+        if (!box || !btn) { clearInterval(lockTimer); return; }
+        const left = lockRemaining();
+        if (left > 0) {
+            const m = Math.floor(left / 60000), s = Math.floor((left % 60000) / 1000);
+            box.innerHTML = `⏳ التسليم متوقف مؤقتاً بسبب أخطاء متكررة<br>راجع شغلك كويس وجرّب بعد <b class="num ltr inline-block">${m}:${String(s).padStart(2, "0")}</b>`;
+            box.classList.remove("hidden-view");
+            btn.disabled = true;
+        } else {
+            box.classList.add("hidden-view");
+            if (!S.submitting) btn.disabled = false;
+            clearInterval(lockTimer);
+        }
+    };
+    tick();
+    if (lockRemaining() > 0) lockTimer = setInterval(tick, 1000);
+}
+
+function registerOcrFail() {
+    const l = getLock();
+    const fails = (l.fails || 0) + 1;
+    if (fails >= OCR_MAX_FAILS) setLock({ fails: 0, until: Date.now() + OCR_LOCK_MS });
+    else setLock({ fails, until: 0 });
+}
+
+/* ---------- OCR ---------- */
+
+let ocrWorkerPromise = null;
+
+function getOcrWorker() {
+    if (!ocrWorkerPromise) {
+        ocrWorkerPromise = Tesseract.createWorker("eng").catch(err => { ocrWorkerPromise = null; throw err; });
+    }
+    return ocrWorkerPromise;
+}
+
+// تجهيز الصورة للـ OCR: تكبير + أبيض وأسود + تباين عالي
+// ولو الخلفية غامقة (سكرين دارك مود) بنقلب الألوان — Tesseract بيقرا الكلام الأسود على أبيض أحسن بكتير
+async function prepareForOcr(file, { invert = "auto", threshold = false } = {}) {
+    const bmp = await createImageBitmap(file);
+    const longSide = Math.max(bmp.width, bmp.height);
+    const scale = longSide < 1400 ? Math.min(3, 1400 / longSide) : Math.min(1, 2400 / longSide);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bmp.width * scale);
+    canvas.height = Math.round(bmp.height * scale);
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    bmp.close?.();
+
+    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = img.data;
+    let total = 0, min = 255, max = 0;
+    for (let i = 0; i < d.length; i += 4) {
+        const g = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        d[i] = g;
+        total += g;
+        if (g < min) min = g;
+        if (g > max) max = g;
+    }
+    const dark = total / (d.length / 4) < 128;
+    const flip = invert === "auto" ? dark : invert;
+    const range = Math.max(1, max - min);
+    for (let i = 0; i < d.length; i += 4) {
+        let g = ((d[i] - min) / range) * 255;   // نمدّ التباين
+        if (flip) g = 255 - g;
+        if (threshold) g = g > 150 ? 255 : 0;
+        d[i] = d[i + 1] = d[i + 2] = g;
+    }
+    ctx.putImageData(img, 0, 0);
+    return canvas;
+}
+
+// بيطلّع كل الأرقام اللي جنب كلمة Valid في النص
+function extractValidNumbers(rawText) {
+    const numbers = [];
+    const lines = rawText.toLowerCase().split("\n")
+        .map(line => line
+            .replace(/(\d)[,\s.](?=\d{3}\b)/g, "$1")                // 1,200 أو 1 200 → 1200
+            .replace(/v[a@4][l1i|!][i1l|!]d/g, "valid")             // VaIid / Va1id → valid
+            .replace(/in\s?valid|unverified|non[\s-]?valid/g, "inv"))
+        .filter(l => l.trim());
+
+    lines.forEach((line, i) => {
+        let m;
+        const after = /valid[^a-z0-9]{0,8}([0-9]+)/g;          // Valid: 80
+        while ((m = after.exec(line))) numbers.push(parseInt(m[1], 10));
+        const before = /([0-9]+)[^a-z0-9]{0,4}valid/g;          // 80 Valid
+        while ((m = before.exec(line))) numbers.push(parseInt(m[1], 10));
+        // الكلمة لوحدها في سطر والرقم في السطر اللي بعده (شكل الجدول)
+        if (/^\W*valid\W*$/.test(line) && lines[i + 1]) {
+            const n = lines[i + 1].match(/^\W*([0-9]+)/);
+            if (n) numbers.push(parseInt(n[1], 10));
+        }
+    });
+    return numbers;
+}
+
+// بيرجع: "match" | "mismatch" | "unreadable"
+// بيجرّب كذا طريقة لحد ما يلاقي الرقم — مش بيستسلم من أول قراية
+async function checkProofImage(file, valid) {
+    let worker;
+    try { worker = await getOcrWorker(); }
+    catch (e) { console.warn("OCR load error:", e); return "unreadable"; }
+
+    const attempts = [
+        () => prepareForOcr(file),                       // تكبير + تباين (+ قلب لو دارك)
+        () => prepareForOcr(file, { threshold: true }),  // أبيض وأسود صريح
+        () => prepareForOcr(file, { invert: false }),    // من غير قلب، لو الكشف اتلخبط
+        () => file                                       // الصورة زي ما هي
+    ];
+
+    const seen = [];
+    for (const make of attempts) {
+        try {
+            const input = await make();
+            const res = await worker.recognize(input);
+            const nums = extractValidNumbers(res?.data?.text || "");
+            if (nums.includes(valid)) return "match";
+            seen.push(...nums);
+        } catch (e) {
+            console.warn("OCR attempt failed:", e);
+        }
+    }
+    return seen.length ? "mismatch" : "unreadable";
+}
+
+async function sha256(file) {
+    try {
+        const buf = await file.arrayBuffer();
+        const hash = await crypto.subtle.digest("SHA-256", buf);
+        return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
+    } catch (e) { return null; }
+}
+
+function isMissingFunction(err) {
+    const m = err?.message || "";
+    return err?.code === "PGRST202" || m.includes("Could not find the function") || m.includes("does not exist");
+}
+
+// بصمة لكل سطر في التكست — بنبعت البصمات بس، مش السطور نفسها
+// (بنشيل المسافات وبنخلي الحروف صغيرة، عشان تغيير شكل السطر مايعدّيش)
+function normalizeLine(line) { return line.replace(/\s+/g, "").toLowerCase(); }
+
+async function hashLines(text) {
+    const lines = [...new Set(text.split(/\r?\n/).map(normalizeLine).filter(Boolean))];
+    const enc = new TextEncoder();
+    const out = [];
+    for (let i = 0; i < lines.length; i += 500) {
+        const chunk = await Promise.all(lines.slice(i, i + 500).map(async l => {
+            const h = await crypto.subtle.digest("SHA-256", enc.encode(l));
+            return [...new Uint8Array(h)].slice(0, 16).map(b => b.toString(16).padStart(2, "0")).join("");
+        }));
+        out.push(...chunk);
+    }
+    return out;
+}
+
+async function rpcCreateSubmission(base, hashes) {
+    const res = await db.rpc("create_submission", {
+        ...base, p_work_hash: hashes.work, p_proof_hash: hashes.proof,
+        p_line_hashes: hashes.lines, p_client_version: APP_VERSION
+    });
+    if (res.error && (res.error.message || "").includes("حدّث الصفحة")) setTimeout(forceUpdate, 2500);
+    return res;
+}
+
+/* ---------- ضغط صورة الاتشيكر قبل الرفع (توفير مساحة) ---------- */
+
+async function compressImage(file, maxSide = 1600, quality = 0.82) {
+    try {
+        if (file.type === "image/gif" || file.size < 300 * 1024) return file;
+        const bmp = await createImageBitmap(file);
+        const scale = Math.min(1, maxSide / Math.max(bmp.width, bmp.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(bmp.width * scale);
+        canvas.height = Math.round(bmp.height * scale);
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+        bmp.close?.();
+        const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", quality));
+        if (!blob || blob.size >= file.size) return file;
+        return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
+    } catch (e) {
+        console.warn("compress failed", e);
+        return file;
+    }
+}
+
+/* ---------- نتيجة التسليم ---------- */
+
+function showSubmitSuccess(tool, valid) {
+    const t = TOOLS[tool];
+    const msg = ENCOURAGE[Math.floor(Math.random() * ENCOURAGE.length)];
+    Sound.success();
+    confetti();
+    openModalHtml(`
+        <div class="text-center">
+            <div class="pop w-24 h-24 mx-auto rounded-full bg-emerald-500 text-white flex items-center justify-center text-5xl shadow-xl shadow-emerald-500/40 mb-5">✓</div>
+            <h3 class="text-2xl font-black">${esc(msg)}</h3>
+            <p class="text-slate-500 dark:text-slate-400 mt-2">تسليمتك وصلت وهتتراجع قريب</p>
+            <div class="grid grid-cols-3 gap-2 mt-6 text-sm">
+                <div class="rounded-2xl ${t.bg} p-3"><p class="text-[11px] text-slate-500">الأداة</p><p class="font-black ${t.text}">${t.icon} ${t.name}</p></div>
+                <div class="rounded-2xl bg-emerald-500/10 p-3"><p class="text-[11px] text-slate-500">Valid</p><p class="font-black text-emerald-500 num">${valid}</p></div>
+                <div class="rounded-2xl bg-sky-500/10 p-3"><p class="text-[11px] text-slate-500">لما تتقبل</p><p class="font-black text-sky-500 num">${money(valid * toolPrice(tool))}</p></div>
+            </div>
+            <button type="button" onclick="closeTopModal(true)" class="w-full mt-6 py-3.5 rounded-2xl bg-gradient-to-r ${t.grad} text-white font-black">تمام 👍</button>
+        </div>`);
+}
+
+function showSubmitError(title, text) {
+    Sound.error();
+    const m = openModalHtml(`
+        <div class="text-center">
+            <div class="w-24 h-24 mx-auto rounded-full bg-red-500 text-white flex items-center justify-center text-5xl shadow-xl shadow-red-500/40 mb-5">✕</div>
+            <h3 class="text-xl font-black text-red-500">${esc(title)}</h3>
+            <p class="text-slate-500 dark:text-slate-400 mt-3 leading-7" style="white-space:pre-line">${esc(text)}</p>
+            <button type="button" onclick="closeTopModal(true)" class="w-full mt-6 py-3.5 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-black font-black">حاضر، هراجع</button>
+        </div>`);
+    m.querySelector(".modal-card").classList.add("shake");
+}
+
+/* ---------- SUBMIT ---------- */
+
+async function submitWork(e, tool) {
+    e.preventDefault();
+    if (S.submitting) return;
+
+    if (lockRemaining() > 0) { updateLockUI(); return; }
+
+    const valid = Number($("validCount").value);
+    const locked = Number($("lockedCount").value);
+    const workFile = $("workFile").files[0];
+    const proofFile = $("proofFile").files[0];
+
+    if (!Number.isInteger(valid) || valid < 0 || !Number.isInteger(locked) || locked < 0) {
+        return toast("اكتب أرقام صحيحة في Valid و Locked", "warning");
+    }
+    if (!workFile) return toast("اختار ملف الـ TXT", "warning");
+    if (!proofFile) return toast("اختار صورة الـ Checker", "warning");
+    if (workFile.size === 0) return toast("ملف التيكست فاضي!", "warning");
+    if (workFile.size > MAX_TXT_SIZE) return toast("ملف TXT كبير جداً (الحد 10 ميجا)", "warning");
+    if (getFileExtension(workFile.name) !== "txt") return toast("لازم الملف يكون .txt", "warning");
+    if (!proofFile.type.startsWith("image/")) return toast("صورة الـ Checker لازم تكون صورة", "warning");
+    if (proofFile.size > MAX_IMG_SIZE) return toast("الصورة كبيرة جداً (الحد 20 ميجا)", "warning");
+
+    S.submitting = true;
+    const btn = $("submitBtn");
+    const btnHtml = btn.innerHTML;
+    const uploaded = [];
+
+    try {
+        setLoading(btn, "بنتأكد من حالة الموقع...");
+        await loadSettings();
+        if (S.settings.closed) { renderRoute(); return toast("الموقع اتقفل دلوقتي", "warning"); }
+        if (isToolClosed(tool)) { renderRoute(); return toast(`${TOOLS[tool].full} اتقفلت دلوقتي`, "warning"); }
+
+        // ---- فحص عدد السطور في ملف التكست ----
+        setLoading(btn, "بنعدّ سطور الملف...");
+        const fileText = await workFile.text();
+        const lineHashes = await hashLines(fileText);
+        // بنعدّ السطور المختلفة بس — السطر المتكرر جوه الملف بيتحسب مرة واحدة
+        // (عشان محدش يكرر سطر ويكتب Valid أكتر)
+        const rawLines = fileText.split(/\r?\n/).filter(l => l.trim()).length;
+        const lines = lineHashes.length;
+        const dupInFile = rawLines - lines;
+        if (!lines) { showSubmitError("ملف التكست فاضي", "الملف مافيهوش أي سطور"); return; }
+
+        // القاعدة: الـ Valid مينفعش يكون أكتر من السطور،
+        // والسطور مسموح تزيد عن Valid + Locked بفرق صغير بس
+        const extra = lineTolerance(valid);
+        if (valid > lines) {
+            showSubmitError("الـ Valid أكتر من السطور", dupInFile > 0
+                ? `الملف فيه ${rawLines} سطر، منهم ${dupInFile} سطر متكرر\nيعني ${lines} سطر مختلف بس\nوإنت كاتب Valid ${valid}\n\nشيل السطور المتكررة أو صلّح الرقم`
+                : `الملف فيه ${lines} سطر\nوإنت كاتب Valid ${valid}\n\nالـ Valid مينفعش يكون أكتر من عدد السطور`);
+            return;
+        }
+        // مفيش حد أقصى للسطور: الملف ممكن يكون فيه Invalid و Error كمان، والموظف بيتحاسب على الـ Valid بس
+        void extra; void locked;
+
+        setLoading(btn, "الـ AI بيراجع الصورة...");
+        const verdict = await checkProofImage(proofFile, valid);
+
+        if (verdict === "mismatch") {
+            registerOcrFail();
+            showSubmitError("الرقم في الصورة مختلف",
+                `الـ Valid اللي في صورة الاتشيكر مش ${valid}\nبرجاء التأكد من الرقم اللي كتبته وجرّب تاني`);
+            return;
+        }
+        // لو الـ AI مقدرش يقرا الصورة مابنوقفش الموظف — التسليمة بتروح للمراجعة اليدوية عادي
+        if (verdict === "unreadable") toast("📷 الـ AI مقدرش يقرا الرقم من الصورة — الإدارة هتراجعها بنفسها", "info");
+        setLock({ fails: 0, until: 0 });
+
+        setLoading(btn, "جاري رفع التسليمة...");
+        const [workHash, proofHash] = await Promise.all([sha256(workFile), sha256(proofFile)]);
+
+        const id = crypto.randomUUID();
+        const uploadProof = await compressImage(proofFile);
+        let ext = uploadProof === proofFile ? getFileExtension(proofFile.name) : "jpg";
+        if (!ALLOWED_IMG_EXT.includes(ext)) ext = "png";
+        const workPath = `${S.user.id}/${id}.txt`;
+        const proofPath = `${S.user.id}/${id}.${ext}`;
+
+        const up1 = await db.storage.from("work-files").upload(workPath, workFile, { contentType: "text/plain", upsert: false });
+        if (up1.error) throw up1.error;
+        uploaded.push(["work-files", workPath]);
+
+        const up2 = await db.storage.from("proofs").upload(proofPath, uploadProof, { contentType: uploadProof.type, upsert: false });
+        if (up2.error) throw up2.error;
+        uploaded.push(["proofs", proofPath]);
+
+        const { error } = await rpcCreateSubmission({
+            p_valid_count: valid, p_locked_count: locked,
+            p_work_file: workPath, p_proof_image: proofPath, p_tool_name: tool
+        }, { work: workHash, proof: proofHash, lines: lineHashes });
+        if (error) throw error;
+
+        uploaded.length = 0;
+        $("submitForm").reset();
+        clearProof();
+        showSubmitSuccess(tool, valid);
+
+        await loadData();
+        rememberSeen();
+        workerToolLive(tool);
+    } catch (err) {
+        console.error(err);
+        showSubmitError("التسليمة ماتبعتتش", friendlyError(err));
+    } finally {
+        for (const [bucket, path] of uploaded) db.storage.from(bucket).remove([path]).catch(() => {});
+        S.submitting = false;
+        if ($("submitBtn")) {
+            $("submitBtn").disabled = false;
+            $("submitBtn").innerHTML = btnHtml;
+        }
+        updateLockUI();
+    }
+}
+
+/* =========================================================
+   WORKER — إشعارات القبول / الرفض / الدفع
+========================================================= */
+
+function seenKey() { return "dz_seen_" + (S.user?.id || ""); }
+
+function snapshot() {
+    const m = {};
+    S.subs.forEach(s => { m[s.id] = s.status + "|" + (isPaid(s) ? "p" : "u"); });
+    return m;
+}
+
+function rememberSeen() { safeSet(seenKey(), JSON.stringify(snapshot())); }
+
+function initWorkerNotifications() {
+    if (!safeGet(seenKey())) { rememberSeen(); return; } // أول مرة على النسخة الجديدة
+    setTimeout(checkWorkerNotifications, 600);
+}
+
+function checkWorkerNotifications() {
+    let prev = {};
+    try { prev = JSON.parse(safeGet(seenKey()) || "{}"); } catch (e) { prev = {}; }
+
+    const approved = [], rejected = [], paid = [];
+    S.subs.forEach(s => {
+        const before = prev[s.id];
+        const [pStatus, pPay] = (before || "").split("|");
+        if (s.status === "approved" && pStatus !== "approved" && !isPaid(s)) approved.push(s);
+        if (s.status === "rejected" && pStatus && pStatus !== "rejected") rejected.push(s);
+        if (isPaid(s) && pPay !== "p") paid.push(s);
+    });
+    rememberSeen();
+
+    if (!approved.length && !rejected.length && !paid.length) return;
+
+    let body = "";
+    if (paid.length) {
+        Sound.money();
+        confetti(120);
+        body += `
+        <div class="rounded-2xl bg-emerald-500/10 border border-emerald-500/30 p-4">
+            <p class="text-3xl mb-1">💸</p>
+            <p class="font-black text-lg text-emerald-500">اتدفعلك ${money(sum(paid, calcPrice))}</p>
+            <p class="text-xs text-slate-500 mt-1">${paid.length} تسليمة اتنقلت للأرشيف — تفاصيلها في "مستحقاتي"</p>
+        </div>`;
+    } else if (approved.length) {
+        Sound.celebrate();
+        confetti();
+    } else {
+        Sound.soft();
+    }
+
+    if (approved.length) {
+        const byTool = ["yazeed", "tayeb"].map(t => {
+            const rows = approved.filter(s => toolOf(s) === t);
+            return rows.length ? `<div class="rounded-xl ${TOOLS[t].bg} px-3 py-2 flex justify-between font-bold text-sm"><span>${TOOLS[t].icon} ${TOOLS[t].name} (${rows.length})</span><span class="num">+${money(sum(rows, calcPrice))}</span></div>` : "";
+        }).join("");
+        body += `
+        <div class="rounded-2xl bg-sky-500/10 border border-sky-500/30 p-4">
+            <p class="text-3xl mb-1">🎉</p>
+            <p class="font-black text-lg">${approved.length === 1 ? "تسليمتك اتقبلت!" : `${approved.length} تسليمات اتقبلت!`}</p>
+            <p class="text-sky-500 font-black text-xl num mt-1">+${money(sum(approved, calcPrice))}</p>
+            <p class="text-xs text-slate-500 mb-3">اتضافوا لمستحقاتك</p>
+            <div class="space-y-1.5">${byTool}</div>
+        </div>`;
+    }
+
+    if (rejected.length) {
+        body += `
+        <div class="rounded-2xl bg-red-500/5 border border-red-500/20 p-4 text-start">
+            <p class="font-black text-red-500 mb-2">${rejected.length === 1 ? "تسليمة اترفضت" : `${rejected.length} تسليمات اترفضت`}</p>
+            ${rejected.map(s => `<div class="text-sm py-1.5 border-t border-red-500/10">
+                ${TOOLS[toolOf(s)].icon} ${fmtDate(s.created_at)} — Valid ${Number(s.valid_count || 0)}
+                ${s.owner_note ? `<br><span class="text-xs text-slate-500">السبب: <b>${esc(s.owner_note)}</b></span>` : ""}
+            </div>`).join("")}
+        </div>`;
+    }
+
+    openModalHtml(`
+        <div class="text-center space-y-3">
+            <h3 class="text-xl font-black mb-2">في جديد ليك 🔔</h3>
+            ${body}
+            <button type="button" onclick="closeTopModal(true)" class="w-full mt-3 py-3.5 rounded-2xl bg-black text-white dark:bg-white dark:text-black font-black">تمام 👍</button>
+        </div>`);
+}
+
+/* =========================================================
+   WORKER — مستحقاتي وحسابي
+========================================================= */
+
+S.moneyTab = "due";
+S.moneyTool = "all";
+
+// الدفعات: كل التسليمات اللي اتدفعت في نفس العملية ليها نفس paid_at
+function groupPaymentBatches(rows) {
+    const map = new Map();
+    rows.filter(isPaid).forEach(s => {
+        const key = s.paid_at ? new Date(s.paid_at).toISOString().slice(0, 19) : "unknown";
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(s);
+    });
+    return [...map.entries()]
+        .map(([key, items]) => ({ key, paidAt: items[0].paid_at, items, total: sum(items, calcPrice) }))
+        .sort((a, b) => new Date(b.paidAt || 0) - new Date(a.paidAt || 0));
+}
+
+function setMoneyTab(tab) { S.moneyTab = tab; refreshMoney(); }
+function setMoneyTool(tool) { S.moneyTool = tool; refreshMoney(); }
+
+function refreshMoney() {
+    const box = $("moneyList");
+    if (box) box.innerHTML = moneyListHtml();
+    document.querySelectorAll("[data-mtab]").forEach(b => b.className = "chip " + (b.dataset.mtab === S.moneyTab ? "chip-active" : "chip-idle"));
+    document.querySelectorAll("[data-mtool]").forEach(b => b.className = "chip " + (b.dataset.mtool === S.moneyTool ? "chip-active" : "chip-idle"));
+}
+
+function moneyListHtml() {
+    let rows = S.subs;
+    if (S.moneyTool !== "all") rows = rows.filter(s => toolOf(s) === S.moneyTool);
+
+    if (S.moneyTab === "due") {
+        const due = rows.filter(isApprovedUnpaid);
+        if (!due.length) return emptyBox("مفيش مستحقات قيد الحساب دلوقتي 👌", "🧾");
+        return `<div class="space-y-2">${due.map(s => `
+            <div class="card px-4 py-3 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    ${toolBadge(s)}
+                    <span class="text-xs text-slate-500 truncate">${fmtDate(s.created_at)}</span>
+                </div>
+                <div class="flex items-center gap-4 shrink-0">
+                    <span class="text-xs text-slate-500">Valid <b class="text-emerald-500 num">${Number(s.valid_count || 0)}</b></span>
+                    <span class="font-black num">${money(calcPrice(s))}</span>
+                </div>
+            </div>`).join("")}</div>`;
+    }
+
+    const batches = groupPaymentBatches(rows);
+    if (!batches.length) return emptyBox("لسه مفيش مدفوعات في الأرشيف", "📦");
+    return `<div class="space-y-3">${batches.map(b => {
+        const y = b.items.filter(s => toolOf(s) === "yazeed"), t = b.items.filter(s => toolOf(s) === "tayeb");
+        return `
+        <details class="card overflow-hidden group">
+            <summary class="list-none cursor-pointer p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-xl">✅</div>
+                    <div>
+                        <p class="font-black">دفعة ${b.paidAt ? fmtShortDate(b.paidAt) : ""}</p>
+                        <p class="text-xs text-slate-500">${b.items.length} تسليمة
+                            ${y.length ? ` · 🟣 ${money(sum(y, calcPrice))}` : ""}${t.length ? ` · ⚡ ${money(sum(t, calcPrice))}` : ""}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-xl font-black text-emerald-500 num">${money(b.total)}</span>
+                    <span class="text-slate-400 group-open:rotate-180 transition">▾</span>
+                </div>
+            </summary>
+            <div class="px-4 pb-4 space-y-1.5">
+                ${b.items.map(s => `<div class="flex items-center justify-between text-sm rounded-xl bg-slate-50 dark:bg-white/[.03] px-3 py-2">
+                    <span>${TOOLS[toolOf(s)].icon} ${fmtDate(s.created_at)}</span>
+                    <span class="text-xs">Valid <b class="num">${Number(s.valid_count || 0)}</b> · <b class="num">${money(calcPrice(s))}</b></span>
+                </div>`).join("")}
+            </div>
+        </details>`;
+    }).join("")}</div>`;
+}
+
+function renderWorkerMoney() {
+    const due = S.subs.filter(isApprovedUnpaid);
+    const pending = S.subs.filter(s => s.status === "pending");
+    const dueTotal = sum(due, calcPrice);
+
+    const toolCard = tool => {
+        const t = TOOLS[tool];
+        const d = due.filter(s => toolOf(s) === tool);
+        const p = pending.filter(s => toolOf(s) === tool);
+        const paid = S.subs.filter(s => isPaid(s) && toolOf(s) === tool);
+        return `
+        <div class="rounded-3xl border-2 ${t.border} ${t.bg} p-5 relative overflow-hidden">
+            <div class="absolute top-3 left-4 text-4xl opacity-20">${t.icon}</div>
+            <p class="font-black ${t.text}">${t.full}</p>
+            <div class="mt-3 space-y-2">
+                <div class="flex items-center justify-between"><span class="text-sm text-slate-500 font-bold">🧾 قيد الحساب</span><span class="font-black text-lg ${t.text}">${countSpan(sum(d, calcPrice), true)}</span></div>
+                <div class="flex items-center justify-between"><span class="text-sm text-slate-500 font-bold">💵 تم الدفع (إجمالي)</span><span class="font-black text-emerald-500">${countSpan(sum(paid, calcPrice), true)}</span></div>
+                <div class="flex items-center justify-between"><span class="text-sm text-slate-500 font-bold">⏳ قيد المراجعة</span><span class="font-black text-yellow-500">${countSpan(sum(p, calcPrice), true)}</span></div>
+            </div>
+        </div>`;
+    };
+
+    const days = lastNDays(7);
+    const chart = barChart(days, ["yazeed", "tayeb"].map(tool => ({
+        label: TOOLS[tool].name, color: TOOLS[tool].hex,
+        values: days.map(d => sum(S.subs.filter(s => toolOf(s) === tool && s.status !== "rejected" && dayKey(s.created_at) === d.key), s => Number(s.valid_count || 0)))
+    })));
+
+    const chip = (attr, val, label, cur) => `<button type="button" data-${attr}="${val}" onclick="${attr === "mtab" ? "setMoneyTab" : "setMoneyTool"}('${val}')" class="chip ${cur === val ? "chip-active" : "chip-idle"}">${label}</button>`;
+
+    return `
+    ${pageHeader("💰 مستحقاتي", "حسابك كله في مكان واحد")}
+
+    <div class="rounded-3xl p-6 md:p-8 mb-6 text-white bg-gradient-to-br from-emerald-600 to-teal-600 shadow-xl">
+        <p class="text-white/80 font-bold">إجمالي مستحقاتك (قيد الحساب)</p>
+        <p class="text-4xl md:text-5xl font-black mt-2">${countSpan(dueTotal, true)}</p>
+        <p class="text-white/80 text-sm mt-2">+ ${money(sum(pending, calcPrice))} قيد المراجعة (${pending.length} تسليمة)</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4 mb-6">${toolCard("yazeed")}${toolCard("tayeb")}</div>
+
+    <div class="card p-5 md:p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-black">📈 شغلك آخر 7 أيام (Valid)</h3>
+        </div>
+        ${chart}
+    </div>
+
+    <div class="card p-5 md:p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+            <div class="flex gap-2">
+                ${chip("mtab", "due", "🧾 قيد الحساب", S.moneyTab)}
+                ${chip("mtab", "paid", "✅ تم الدفع", S.moneyTab)}
+            </div>
+            <div class="flex gap-2">
+                ${chip("mtool", "all", "الكل", S.moneyTool)}
+                ${chip("mtool", "yazeed", "🟣 يزيد", S.moneyTool)}
+                ${chip("mtool", "tayeb", "⚡ الطيب", S.moneyTool)}
+            </div>
+        </div>
+        <div id="moneyList">${moneyListHtml()}</div>
+    </div>
+
+    ${accountSectionHtml()}`;
+}
+
+function accountSectionHtml() {
+    return `
+    <div class="card p-5 md:p-6" id="accountSection">
+        <h3 class="text-lg font-black mb-4">👤 حسابي</h3>
+        <div class="grid md:grid-cols-2 gap-4">
+            <div class="rounded-2xl bg-slate-100 dark:bg-black/25 p-4">
+                <p class="text-xs text-slate-500">الاسم</p>
+                <p class="font-black mt-1">${esc(S.me.full_name || "-")}</p>
+                <p class="text-xs text-slate-500 mt-3">اسم المستخدم</p>
+                <p class="font-black mt-1 ltr">@${esc(S.me.username || "-")}</p>
+            </div>
+            <div class="rounded-2xl bg-slate-100 dark:bg-black/25 p-4">
+                <p class="text-xs text-slate-500 mb-2">رقم الكاش</p>
+                <div class="flex gap-2">
+                    <input id="cashInput" value="${esc(S.me.cash_number || "")}" inputmode="numeric" maxlength="11" class="input ltr">
+                    <button type="button" onclick="saveCash()" class="px-4 rounded-2xl bg-black text-white dark:bg-white dark:text-black font-black text-sm">حفظ</button>
+                </div>
+            </div>
+        </div>
+
+        <form onsubmit="changeMyPassword(event)" class="mt-4 rounded-2xl border border-slate-200 dark:border-white/10 p-4">
+            <p class="font-black mb-3">🔐 تغيير الباسورد</p>
+            <div class="grid md:grid-cols-3 gap-3">
+                <input id="newPass1" type="password" minlength="6" required autocomplete="new-password" placeholder="الباسورد الجديد" class="input ltr">
+                <input id="newPass2" type="password" minlength="6" required autocomplete="new-password" placeholder="أكّد الباسورد" class="input ltr">
+                <button id="passBtn" class="rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3">حفظ الباسورد</button>
+            </div>
+        </form>
+
+        <button type="button" onclick="logout()" class="w-full mt-4 py-3.5 rounded-2xl bg-red-500/10 text-red-500 font-black">🚪 تسجيل خروج</button>
+    </div>`;
+}
+
+async function saveCash() {
+    const cash = $("cashInput").value.trim();
+    if (!CASH_RE.test(cash)) return toast("رقم الكاش لازم يكون 11 رقم ويبدأ بـ 010 / 011 / 012 / 015", "warning");
+    const { error } = await db.from("profiles").update({ cash_number: cash }).eq("id", S.user.id);
+    if (error) return toast(friendlyError(error), "error");
+    S.me.cash_number = cash;
+    toast("تم حفظ رقم الكاش ✅", "success");
+}
+
+async function changeMyPassword(e) {
+    e.preventDefault();
+    const a = $("newPass1").value, b = $("newPass2").value;
+    if (a.length < 6) return toast("الباسورد لازم يكون 6 حروف على الأقل", "warning");
+    if (a !== b) return toast("الباسوردين مش زي بعض", "warning");
+    const btn = $("passBtn");
+    setLoading(btn, "جاري الحفظ...");
+    const { error } = await db.auth.updateUser({ password: a });
+    btn.disabled = false;
+    btn.textContent = "حفظ الباسورد";
+    if (error) return toast(friendlyError(error), "error");
+    try { saveBrowserPassword(S.user?.email, a); } catch (e) {}
+    $("newPass1").value = ""; $("newPass2").value = "";
+    toast("✅ تم تغيير الباسورد", "success");
+}
+
+// تغيير الباسورد من أي صفحة (للأونر والمشرف والموظف)
+function openChangePassword() {
+    const m = openModalHtml(`
+        <div class="text-center mb-4">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-indigo-500/10 flex items-center justify-center text-3xl mb-3">🔑</div>
+            <h3 class="text-xl font-black">تغيير الباسورد</h3>
+        </div>
+        <form id="cpForm" class="space-y-3">
+            <input id="cpPass1" type="password" minlength="6" required autocomplete="new-password" placeholder="الباسورد الجديد" class="input ltr">
+            <input id="cpPass2" type="password" minlength="6" required autocomplete="new-password" placeholder="أكّد الباسورد" class="input ltr">
+            <div class="flex gap-3 pt-2">
+                <button type="button" data-act="cancel" class="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-white/10 font-bold">إلغاء</button>
+                <button id="cpBtn" class="flex-1 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black">حفظ الباسورد</button>
+            </div>
+        </form>`);
+    setTimeout(() => m.querySelector("#cpPass1")?.focus(), 60);
+    m.querySelector('[data-act="cancel"]').onclick = () => closeTopModal(true);
+    m.querySelector("#cpForm").onsubmit = async e => {
+        e.preventDefault();
+        const a = m.querySelector("#cpPass1").value, b = m.querySelector("#cpPass2").value;
+        if (a.length < 6) return toast("الباسورد لازم يكون 6 حروف على الأقل", "warning");
+        if (a !== b) return toast("الباسوردين مش زي بعض", "warning");
+        const btn = m.querySelector("#cpBtn");
+        setLoading(btn, "جاري الحفظ...");
+        const { error } = await db.auth.updateUser({ password: a });
+        if (error) {
+            btn.disabled = false;
+            btn.textContent = "حفظ الباسورد";
+            return toast(friendlyError(error), "error");
+        }
+        try { saveBrowserPassword(S.user?.email, a); } catch (e) {}
+        closeTopModal(true);
+        toast("✅ تم تغيير الباسورد", "success");
+    };
+}
+
+PAGES.worker.money = {
+    render: renderWorkerMoney,
+    live: () => {
+        const typing = ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName);
+        if (typing || modalStack.length) return;
+        const y = window.scrollY;
+        const openDetails = [...document.querySelectorAll("#moneyList details[open]")].length;
+        if (openDetails) return; // مانقفلش الدفعة اللي هو فاتحها
+        mountPage(renderWorkerMoney());
+        window.scrollTo(0, y);
+    }
+};
+
+/* =========================================================
+   OWNER / SUPERVISOR — أدوات مشتركة
+========================================================= */
+
+const isOwner = () => S.me?.role === "owner";
+
+function workerLink(id) {
+    const name = esc(profileName(id));
+    if (!isOwner()) return `<span class="font-black">${name}</span>`;
+    return `<a href="#/worker/${arg(id)}" class="font-black hover:text-indigo-500 hover:underline">${name}</a>`;
+}
+
+function workerById(id) { return S.workers.find(w => w.id === id); }
+
+async function reloadAndRefresh() {
+    await Promise.all([loadSettings(), loadData()]);
+    S.lastPendingCount = S.subs.filter(s => s.status === "pending").length;
+    const y = window.scrollY;
+    renderRoute();
+    window.scrollTo(0, y);
+}
+
+/* ---------- كارت المراجعة ---------- */
+
+function reviewCard(row, { showTool = true } = {}) {
+    const id = arg(row.id);
+    return `
+    <div class="card p-4 flex gap-4">
+        ${row.proof_image ? `<img data-proof="${esc(row.proof_image)}" class="thumb shrink-0" alt="">` : `<div class="thumb shrink-0 flex items-center justify-center text-2xl">🖼️</div>`}
+        <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+                ${workerLink(row.worker_id)}
+                ${showTool ? toolBadge(row) : ""}
+            </div>
+            <p class="text-xs text-slate-500 mt-1">${fmtDate(row.created_at)}</p>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm">
+                <span>Valid <b class="text-emerald-500 num">${Number(row.valid_count || 0)}</b></span>
+                <span>Locked <b class="text-yellow-500 num">${Number(row.locked_count || 0)}</b></span>
+                <span>المبلغ <b class="num">${money(calcPrice(row))}</b></span>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-3">
+                <button type="button" onclick="reviewSub('${id}','approved')" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black">✅ قبول</button>
+                <button type="button" onclick="reviewSub('${id}','rejected')" class="px-4 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black">❌ رفض</button>
+                ${fileButtons(row)}
+            </div>
+        </div>
+    </div>`;
+}
+
+function pendingListHtml(rows, opts) {
+    if (!rows.length) return emptyBox("مفيش تسليمات مستنية مراجعة 🎉", "✅");
+    return `<div class="grid xl:grid-cols-2 gap-3">${rows.map(r => reviewCard(r, opts)).join("")}</div>`;
+}
+
+/* ---------- قبول / رفض ---------- */
+
+function reviewSub(idEnc, status) {
+    const id = unarg(idEnc);
+    const row = S.subs.find(s => s.id === id);
+    if (!row) return;
+    if (row.status !== "pending") return toast("التسليمة دي اتراجعت قبل كده", "warning");
+
+    const who = profileName(row.worker_id);
+    const info = `${who} — ${TOOLS[toolOf(row)].name} — Valid ${Number(row.valid_count || 0)} (${money(calcPrice(row))})`;
+
+    if (status === "approved") {
+        confirmDialog({
+            title: "قبول التسليمة", text: info, icon: "✅",
+            confirmText: "قبول ✅", confirmClass: "bg-emerald-600 text-white",
+            onConfirm: () => doReview(id, "approved", null)
+        });
+    } else {
+        confirmDialog({
+            title: "رفض التسليمة", text: info, icon: "❌",
+            confirmText: "رفض ❌", confirmClass: "bg-red-600 text-white",
+            input: { label: "سبب الرفض (هيظهر للموظف):", placeholder: "مثلاً: الصورة مش مطابقة للملف", textarea: true },
+            onConfirm: note => doReview(id, "rejected", note)
+        });
+    }
+}
+
+async function doReview(id, status, note) {
+    const { error } = await db.rpc("review_submission", {
+        p_submission_id: id, p_status: status,
+        p_note: note && note.trim() ? note.trim().slice(0, 500) : null
+    });
+    if (error) { toast(friendlyError(error), "error"); return; }
+    toast(status === "approved" ? "تم القبول ✅" : "تم الرفض ❌", "success");
+    await reloadAndRefresh();
+}
+
+function approveAll(tool) {
+    const rows = S.subs.filter(s => s.status === "pending" && (tool === "all" || toolOf(s) === tool));
+    if (!rows.length) return toast("مفيش تسليمات معلقة", "info");
+
+    confirmDialog({
+        title: "قبول كل المعلق", icon: "✅",
+        text: `هتقبل ${rows.length} تسليمة${tool !== "all" ? " على " + TOOLS[tool].name : ""}\nبإجمالي ${money(sum(rows, calcPrice))}`,
+        confirmText: `قبول الكل (${rows.length})`, confirmClass: "bg-emerald-600 text-white",
+        onConfirm: async () => {
+            let ok = 0, fail = 0;
+            for (const r of rows) {
+                const { error } = await db.rpc("review_submission", { p_submission_id: r.id, p_status: "approved", p_note: null });
+                if (error) fail++; else ok++;
+            }
+            toast(fail ? `اتقبل ${ok} و ${fail} فشلوا` : `✅ اتقبل ${ok} تسليمة`, fail ? "warning" : "success");
+            await reloadAndRefresh();
+        }
+    });
+}
+
+/* ---------- الدفع ---------- */
+
+function waMessage(workerId, rows, scope = "") {
+    const w = workerById(workerId);
+    const y = rows.filter(s => toolOf(s) === "yazeed"), t = rows.filter(s => toolOf(s) === "tayeb");
+    const parts = [];
+    if (y.length) parts.push(`يزيد ${money(sum(y, calcPrice))}`);
+    if (t.length) parts.push(`الطيب ${money(sum(t, calcPrice))}`);
+    return `اتحولك ${money(sum(rows, calcPrice))} على ${w?.cash_number || "-"} — ${parts.join(" + ")}${scope ? ` (${scope})` : ""} ✅ DARK ZONE`;
+}
+
+// بعد أي دفع: مودال فيه رسالة واتساب جاهزة لكل موظف
+function showPaidResult(groups, scope) {
+    S.lastPaidMessages = groups.map(g => waMessage(g.workerId, g.rows, scope));
+    Sound.money();
+    openModalHtml(`
+        <div class="text-center">
+            <div class="pop w-20 h-20 mx-auto rounded-full bg-emerald-500 text-white flex items-center justify-center text-4xl mb-4">💸</div>
+            <h3 class="text-xl font-black">تم الدفع ونقل التسليمات للأرشيف</h3>
+            <p class="text-sm text-slate-500 mt-1">انسخ الرسالة وابعتها للموظف على واتساب</p>
+        </div>
+        <div class="space-y-2 mt-5">
+            ${groups.map((g, i) => `
+            <div class="rounded-2xl bg-slate-100 dark:bg-black/25 p-3">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="font-black">${esc(profileName(g.workerId))}</span>
+                    <span class="font-black text-emerald-500 num">${money(sum(g.rows, calcPrice))}</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1 leading-6">${esc(S.lastPaidMessages[i])}</p>
+                <button type="button" onclick="copyText(S.lastPaidMessages[${i}], 'اتنسخت الرسالة 📋')" class="mt-2 px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-black">📋 نسخ رسالة الواتساب</button>
+            </div>`).join("")}
+        </div>
+        <div class="flex gap-2 mt-5">
+            ${groups.length > 1 ? `<button type="button" onclick="copyText(S.lastPaidMessages.join('\\n\\n'), 'اتنسخوا كلهم 📋')" class="flex-1 py-3 rounded-2xl bg-emerald-600 text-white font-black">📋 نسخ الكل</button>` : ""}
+            <button type="button" onclick="closeTopModal(true)" class="flex-1 py-3 rounded-2xl bg-slate-200 dark:bg-white/10 font-black">تمام</button>
+        </div>`, { width: "max-w-lg" });
+}
+
+async function payRows(rows, scope) {
+    const ids = rows.map(r => r.id);
+    const { data, error } = await db.rpc("mark_submissions_paid", { p_submission_ids: ids });
+    if (error) { toast(friendlyError(error), "error"); return false; }
+    const count = typeof data === "number" ? data : ids.length;
+    if (count < ids.length) toast(`⚠️ اتدفع ${count} من ${ids.length} — الباقي كان اتدفع أو اتغيرت حالته`, "warning");
+
+    const byWorker = new Map();
+    rows.forEach(r => {
+        if (!byWorker.has(r.worker_id)) byWorker.set(r.worker_id, []);
+        byWorker.get(r.worker_id).push(r);
+    });
+    await reloadAndRefresh();
+    showPaidResult([...byWorker.entries()].map(([workerId, rs]) => ({ workerId, rows: rs })), scope);
+    return true;
+}
+
+function payWorkerTool(workerIdEnc, tool) {
+    const workerId = unarg(workerIdEnc);
+    const rows = S.subs.filter(s => s.worker_id === workerId && isApprovedUnpaid(s) && (tool === "all" || toolOf(s) === tool));
+    if (!rows.length) return toast("مفيش مستحقات للموظف ده", "info");
+    const label = tool === "all" ? "كل الأدوات" : TOOLS[tool].full;
+    confirmDialog({
+        title: `دفع ${label}`, icon: "💵",
+        text: `${profileName(workerId)}\n${rows.length} تسليمة — ${money(sum(rows, calcPrice))}\nرقم الكاش: ${workerById(workerId)?.cash_number || "-"}`,
+        confirmText: "تأكيد الدفع 💸", confirmClass: "bg-emerald-600 text-white",
+        onConfirm: () => payRows(rows, label)
+    });
+}
+
+function paySingle(idEnc) {
+    const id = unarg(idEnc);
+    const row = S.subs.find(s => s.id === id);
+    if (!row) return;
+    confirmDialog({
+        title: "دفع التسليمة دي", icon: "💵",
+        text: `${profileName(row.worker_id)} — ${money(calcPrice(row))}`,
+        confirmText: "تأكيد الدفع", confirmClass: "bg-emerald-600 text-white",
+        onConfirm: () => payRows([row], "تسليمة واحدة")
+    });
+}
+
+function deleteSub(idEnc) {
+    const id = unarg(idEnc);
+    const row = S.subs.find(s => s.id === id);
+    if (!row) return;
+    confirmDialog({
+        title: "حذف التسليمة نهائياً", icon: "🗑️",
+        text: `${profileName(row.worker_id)} — ${fmtDate(row.created_at)}\nمش هتقدر ترجّعها تاني.`,
+        confirmText: "حذف", confirmClass: "bg-red-600 text-white",
+        onConfirm: async () => {
+            const { error } = await db.rpc("delete_submission", { p_submission_id: id });
+            if (error) { toast(friendlyError(error), "error"); return; }
+            if (row.work_file) db.storage.from("work-files").remove([row.work_file]).catch(() => {});
+            if (row.proof_image) db.storage.from("proofs").remove([row.proof_image]).catch(() => {});
+            toast("اتحذفت 🗑️", "success");
+            await reloadAndRefresh();
+        }
+    });
+}
+
+/* ---------- إعدادات الموقع والأدوات ---------- */
+
+async function updateSettings(patch, okMsg) {
+    const { error } = await db.from("site_settings")
+        .update({ ...patch, updated_at: new Date().toISOString(), updated_by: S.user.id }).eq("id", 1);
+    if (error) { toast(friendlyError(error), "error"); return false; }
+    toast(okMsg, "success");
+    await reloadAndRefresh();
+    return true;
+}
+
+function toggleSite() {
+    const closing = !S.settings.closed;
+    confirmDialog({
+        title: closing ? "قفل الموقع" : "فتح الموقع", icon: closing ? "🔒" : "🔓",
+        text: closing ? "الموظفين مش هيقدروا يسلّموا لحد ما تفتحه تاني." : "الموظفين هيقدروا يسلّموا تاني.",
+        confirmText: closing ? "قفل الموقع" : "فتح الموقع",
+        confirmClass: closing ? "bg-red-600 text-white" : "bg-emerald-600 text-white",
+        onConfirm: () => updateSettings({ is_closed: closing }, closing ? "🔒 الموقع اتقفل" : "🔓 الموقع اتفتح")
+    });
+}
+
+function toggleTool(tool) {
+    const closing = !isToolClosed(tool);
+    const col = tool === "tayeb" ? "is_tayeb_closed" : "is_yazeed_closed";
+    confirmDialog({
+        title: `${closing ? "قفل" : "فتح"} ${TOOLS[tool].full}`, icon: TOOLS[tool].icon,
+        confirmText: closing ? "قفل" : "فتح",
+        confirmClass: closing ? "bg-red-600 text-white" : "bg-emerald-600 text-white",
+        onConfirm: () => updateSettings({ [col]: closing }, `${TOOLS[tool].full} ${closing ? "اتقفلت 🔒" : "اتفتحت 🔓"}`)
+    });
+}
+
+function saveToolPrice(tool) {
+    const v = Number($("priceInput").value);
+    if (!Number.isFinite(v) || v < 0) return toast("اكتب سعر صحيح", "warning");
+    const patch = tool === "tayeb" ? { tayeb_price: v } : { yazeed_price: v, valid_price: v };
+    confirmDialog({
+        title: `تغيير سعر ${TOOLS[tool].name}`, icon: "💲",
+        text: `السعر الجديد: ${money(v)} للـ Valid\nهيتطبق على التسليمات الجديدة بس.`,
+        confirmText: "حفظ السعر", confirmClass: "bg-indigo-600 text-white",
+        onConfirm: () => updateSettings(patch, "✅ اتحفظ السعر")
+    });
+}
+
+/* ---------- ZIP لملفات يوم ---------- */
+
+async function downloadZip(rows, name) {
+    rows = rows.filter(r => r.work_file);
+    if (!rows.length) return toast("مفيش ملفات TXT", "warning");
+    toast(`جاري تجميع ${rows.length} ملف...`, "info");
+    const zip = new JSZip();
+    const folder = zip.folder(name);
+    let ok = 0, fail = 0;
+    const queue = [...rows];
+    const worker = async () => {
+        while (queue.length) {
+            const r = queue.shift();
+            try {
+                const { data, error } = await db.storage.from("work-files").createSignedUrl(r.work_file, 120);
+                if (error) throw error;
+                const res = await fetch(data.signedUrl);
+                if (!res.ok) throw new Error(res.status);
+                const w = workerById(r.worker_id);
+                const who = (w?.username || "worker").replace(/[^\w.-]/g, "_");
+                folder.file(`${who}_${TOOLS[toolOf(r)].key}_${r.work_file.split("/").pop()}`, await res.blob());
+                ok++;
+            } catch (e) { fail++; console.error(e); }
+        }
+    };
+    await Promise.all([worker(), worker(), worker(), worker()]);
+    if (!ok) return toast("فشل تحميل الملفات", "error");
+    const blob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = name + ".zip";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast(fail ? `اتحمل ${ok} و ${fail} فشلوا` : `✅ اتحمل ${ok} ملف`, fail ? "warning" : "success");
+}
+
+/* =========================================================
+   OWNER — تسجيل بصمات التسليمات القديمة (مرة واحدة)
+========================================================= */
+
+function backfillCandidates() {
+    if (!S.subs.length || !("lines_registered" in S.subs[0])) return []; // ملف الـ SQL لسه ماتشغلش
+    return S.subs
+        .filter(s => s.lines_registered === false && s.status !== "rejected" && s.work_file)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at)); // الأقدم الأول
+}
+
+function backfillBannerHtml() {
+    const n = backfillCandidates().length;
+    if (!n) return "";
+    return `
+    <div class="rounded-3xl border border-sky-500/30 bg-sky-500/10 p-5 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <p class="font-black text-sky-600 dark:text-sky-400">🛡️ خطوة مهمة مرة واحدة بس</p>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">فيه <b class="num">${n}</b> تسليمة قديمة لسه سطورها مش متسجلة — يعني ممكن حد يرجع يسلّم نفس السطور تاني.<br>اضغط الزرار وسيب الصفحة مفتوحة لحد ما يخلص.</p>
+        </div>
+        <button type="button" id="backfillBtn" onclick="runBackfill()" class="px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-black shrink-0">🛡️ سجّل التسليمات القديمة</button>
+    </div>`;
+}
+
+async function runBackfill() {
+    const list = backfillCandidates();
+    if (!list.length) return;
+    const btn = $("backfillBtn");
+    S.backfilling = true;
+    const found = [];
+    let done = 0, failed = 0;
+
+    for (const row of list) {
+        if (btn) btn.innerHTML = `<span class="inline-flex items-center gap-2"><span class="loader"></span>${done}/${list.length}</span>`;
+        try {
+            const { data, error } = await db.storage.from("work-files").createSignedUrl(row.work_file, 120);
+            if (error) throw error;
+            const res = await fetch(data.signedUrl);
+            if (!res.ok) throw new Error(res.status);
+            const hashes = await hashLines(await res.text());
+            const r = await db.rpc("admin_register_lines", { p_submission_id: row.id, p_line_hashes: hashes });
+            if (r.error) throw r.error;
+            if (r.data > 0) found.push({ row, dup: r.data, total: hashes.length });
+        } catch (e) {
+            failed++;
+            console.error("backfill", row.id, e);
+        }
+        done++;
+    }
+    S.backfilling = false;
+    await reloadAndRefresh();
+
+    openModalHtml(`
+        <div class="text-center">
+            <div class="text-4xl mb-2">🛡️</div>
+            <h3 class="text-xl font-black">خلصنا!</h3>
+            <p class="text-sm text-slate-500 mt-2">اتسجلت ${done - failed} تسليمة${failed ? ` — و ${failed} ماتقرتش (ممكن ملفها اتمسح)` : ""}.<br>من دلوقتي أي سطر فيهم مش هيتقبل تاني.</p>
+        </div>
+        ${found.length ? `
+        <div class="mt-5">
+            <p class="font-black text-red-500 mb-2">⚠️ لقينا تسليمات قديمة فيها سطور متكررة:</p>
+            <div class="space-y-2 max-h-72 overflow-y-auto">${found.map(f => `
+                <div class="rounded-xl bg-red-500/5 border border-red-500/20 px-3 py-2 flex items-center justify-between gap-2 text-sm">
+                    <div>${workerLink(f.row.worker_id)}<p class="text-[11px] text-slate-500">${fmtDate(f.row.created_at)} · ${TOOLS[toolOf(f.row)].name}</p></div>
+                    <b class="text-red-500 num">${f.dup} من ${f.total} سطر</b>
+                </div>`).join("")}</div>
+            <p class="text-[11px] text-slate-500 mt-2">السطور دي كانت اتسلّمت في تسليمة أقدم. راجعهم لو تحب.</p>
+        </div>` : `<p class="text-center text-emerald-500 font-black mt-4">✅ مالقيناش أي سطور متكررة في الشغل القديم</p>`}
+        <button type="button" onclick="closeTopModal(true)" class="w-full mt-5 py-3 rounded-2xl bg-black text-white dark:bg-white dark:text-black font-black">تمام</button>`, { width: "max-w-lg" });
+}
+
+/* =========================================================
+   OWNER — 🏠 نظرة عامة
+========================================================= */
+
+function renderOwnerHome() {
+    const pending = S.subs.filter(s => s.status === "pending");
+    const due = S.subs.filter(isApprovedUnpaid);
+    const weekAgo = Date.now() - 7 * 86400e3;
+    const paidWeek = S.subs.filter(s => isPaid(s) && s.paid_at && new Date(s.paid_at).getTime() > weekAgo);
+    const t = todayKey();
+    const today = S.subs.filter(s => dayKey(s.created_at) === t);
+
+    const days = lastNDays(7);
+    const chart = barChart(days, ["yazeed", "tayeb"].map(tool => ({
+        label: TOOLS[tool].name, color: TOOLS[tool].hex,
+        values: days.map(d => sum(S.subs.filter(s => toolOf(s) === tool && s.status !== "rejected" && dayKey(s.created_at) === d.key), s => Number(s.valid_count || 0)))
+    })));
+
+    const toolMini = tool => {
+        const tt = TOOLS[tool];
+        const closed = isToolClosed(tool);
+        return `
+        <a href="#/${tool}" class="rounded-3xl border-2 ${tt.border} ${tt.bg} p-5 block hover:scale-[1.01] transition">
+            <div class="flex items-center justify-between">
+                <p class="font-black ${tt.text}">${tt.icon} ${tt.full}</p>
+                <span class="text-xs font-black px-2 py-1 rounded-lg ${closed ? "bg-red-500/15 text-red-500" : "bg-emerald-500/15 text-emerald-500"}">${closed ? "🔒 مقفولة" : "🟢 شغالة"}</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+                <div><p class="text-[11px] text-slate-500">السعر</p><p class="font-black num">${money(toolPrice(tool))}</p></div>
+                <div><p class="text-[11px] text-slate-500">معلق</p><p class="font-black text-yellow-500 num">${pendingCountFor(tool)}</p></div>
+                <div><p class="text-[11px] text-slate-500">مستحقات</p><p class="font-black num">${money(sum(due.filter(s => toolOf(s) === tool), calcPrice))}</p></div>
+            </div>
+        </a>`;
+    };
+
+    return `
+    ${pageHeader("أهلاً يا ريس 👑", "كل حاجة في الموقع قدامك",
+        `<button type="button" onclick="toggleSite()" class="px-5 py-3 rounded-2xl font-black ${S.settings.closed ? "bg-red-500/15 text-red-500" : "bg-emerald-500/15 text-emerald-500"}">
+            ${S.settings.closed ? "🔒 الموقع مقفول — افتحه" : "🟢 الموقع مفتوح — اقفله"}</button>`)}
+
+    ${backfillBannerHtml()}
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+        ${statCard({ label: "مستنية مراجعة", value: pending.length, tone: "yellow", icon: "⏳" })}
+        ${statCard({ label: "مستحقات يزيد", value: sum(due.filter(s => toolOf(s) === "yazeed"), calcPrice), money: true, tone: "purple", icon: "🟣" })}
+        ${statCard({ label: "مستحقات الطيب", value: sum(due.filter(s => toolOf(s) === "tayeb"), calcPrice), money: true, tone: "orange", icon: "⚡" })}
+        ${statCard({ label: "اتدفع آخر 7 أيام", value: sum(paidWeek, calcPrice), money: true, tone: "emerald", icon: "💸" })}
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-4 mb-6">
+        <div class="card p-5 md:p-6 lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-black">📈 الـ Valid آخر 7 أيام</h3>
+                <span class="text-xs text-slate-500">النهاردة: <b class="num">${today.length}</b> تسليمة · <b class="num">${sum(today, s => Number(s.valid_count || 0))}</b> Valid</span>
+            </div>
+            ${chart}
+        </div>
+        <div class="space-y-4">${toolMini("yazeed")}${toolMini("tayeb")}</div>
+    </div>
+
+    <div class="card p-5 md:p-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+            <div>
+                <h3 class="text-lg font-black">⚡ المراجعات المعلقة <span class="text-yellow-500 num">(${pending.length})</span></h3>
+                <p class="text-xs text-slate-500">من الأداتين — الأحدث فوق</p>
+            </div>
+            ${pending.length ? `<button type="button" onclick="approveAll('all')" class="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm">✅ قبول كل المعلق (${pending.length})</button>` : ""}
+        </div>
+        ${pendingListHtml(pending.slice(0, 8))}
+        ${pending.length > 8 ? `<p class="text-center text-sm text-slate-500 mt-4">و ${pending.length - 8} كمان — افتح صفحة <a href="#/yazeed" class="text-purple-500 font-black">يزيد</a> أو <a href="#/tayeb" class="text-orange-500 font-black">الطيب</a></p>` : ""}
+    </div>`;
+}
+
+PAGES.owner.home = { render: renderOwnerHome, live: () => { if (!S.backfilling) { const typing = ["INPUT","TEXTAREA"].includes(document.activeElement?.tagName); if (!typing && !modalStack.length) { const y = window.scrollY; mountPage(renderOwnerHome()); window.scrollTo(0, y); } } } };
+
+/* =========================================================
+   OWNER + SUPERVISOR — 🟣 يزيد / ⚡ الطيب
+========================================================= */
+
+S.toolView = { yazeed: { date: "", filter: "all" }, tayeb: { date: "", filter: "all" } };
+
+function ledgerRows(tool) {
+    const v = S.toolView[tool];
+    let rows = S.subs.filter(s => toolOf(s) === tool);
+    if (v.date) rows = rows.filter(s => dayKey(s.created_at) === v.date);
+    if (v.filter === "pending") rows = rows.filter(s => s.status === "pending");
+    else if (v.filter === "due") rows = rows.filter(isApprovedUnpaid);
+    else if (v.filter === "paid") rows = rows.filter(isPaid);
+    else if (v.filter === "rejected") rows = rows.filter(s => s.status === "rejected");
+    return rows;
+}
+
+function setLedger(tool, key, value) {
+    S.toolView[tool][key] = value;
+    const box = $("ledgerBox");
+    if (box) box.innerHTML = ledgerHtml(tool);
+}
+
+function ledgerHtml(tool) {
+    const v = S.toolView[tool];
+    const rows = ledgerRows(tool);
+    const chip = (val, label) => `<button type="button" onclick="setLedger('${tool}','filter','${val}')" class="chip ${v.filter === val ? "chip-active" : "chip-idle"}">${label}</button>`;
+    const shown = rows.slice(0, 150);
+
+    return `
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
+        <div class="flex flex-wrap gap-2">
+            ${chip("all", "الكل")}${chip("pending", "⏳ معلق")}${chip("due", "🧾 قيد الحساب")}${chip("paid", "💵 مدفوع")}${chip("rejected", "❌ مرفوض")}
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <input type="date" value="${esc(v.date)}" onchange="setLedger('${tool}','date',this.value)" class="input ltr !w-auto !py-2 text-sm">
+            ${v.date ? `<button type="button" onclick="setLedger('${tool}','date','')" class="px-3 py-2 rounded-xl bg-red-500/10 text-red-500 font-bold text-sm">✖</button>` : ""}
+            ${isOwner() ? `<button type="button" onclick="zipToolDay('${tool}')" class="px-4 py-2 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-black font-black text-sm">📦 ZIP ${v.date ? "اليوم ده" : ""}</button>` : ""}
+        </div>
+    </div>
+    <div class="flex gap-4 text-sm mb-3 text-slate-500">
+        <span>${rows.length} تسليمة</span>
+        <span>Valid <b class="num text-emerald-500">${sum(rows.filter(r => r.status !== "rejected"), r => Number(r.valid_count || 0))}</b></span>
+        <span>المبلغ <b class="num">${money(sum(rows.filter(r => r.status !== "rejected"), calcPrice))}</b></span>
+    </div>
+    ${!rows.length ? emptyBox("مفيش تسليمات بالفلتر ده") : `
+    <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-white/10">
+        <table class="dz-table w-full">
+            <thead class="bg-slate-50 dark:bg-white/[.03]"><tr>
+                <th>الموظف</th><th>التاريخ</th><th>Valid</th><th>Locked</th><th>المبلغ</th><th>الحالة</th><th>الملفات</th>${isOwner() ? "<th></th>" : ""}
+            </tr></thead>
+            <tbody>${shown.map(r => `<tr>
+                <td>${workerLink(r.worker_id)}${reviewedByLine(r)}</td>
+                <td class="text-xs text-slate-500">${fmtDate(r.created_at)}</td>
+                <td class="font-black text-emerald-500 num">${Number(r.valid_count || 0)}</td>
+                <td class="font-black text-yellow-500 num">${Number(r.locked_count || 0)}</td>
+                <td class="font-black num">${money(calcPrice(r))}</td>
+                <td><div class="flex gap-1">${statusBadge(r)}${payBadge(r)}</div></td>
+                <td><div class="flex gap-1">${fileButtons(r)}</div></td>
+                ${isOwner() ? `<td><div class="flex gap-1">
+                    ${r.status === "pending" ? `<button type="button" onclick="reviewSub('${arg(r.id)}','approved')" class="px-2 py-1 rounded-lg bg-emerald-600 text-white text-xs font-black">✅</button><button type="button" onclick="reviewSub('${arg(r.id)}','rejected')" class="px-2 py-1 rounded-lg bg-red-600 text-white text-xs font-black">❌</button>` : ""}
+                    <button type="button" onclick="deleteSub('${arg(r.id)}')" class="px-2 py-1 rounded-lg bg-red-500/10 text-red-500 text-xs font-black" title="حذف">🗑️</button>
+                </div></td>` : ""}
+            </tr>`).join("")}</tbody>
+        </table>
+    </div>
+    ${rows.length > shown.length ? `<p class="text-center text-xs text-slate-500 mt-3">بيظهر أول ${shown.length} — استخدم فلتر التاريخ عشان توصل للباقي</p>` : ""}`}`;
+}
+
+function zipToolDay(tool) {
+    const v = S.toolView[tool];
+    if (!v.date) return toast("اختار يوم من التاريخ الأول", "warning");
+    downloadZip(ledgerRows(tool), `${TOOLS[tool].key}_${v.date}`);
+}
+
+function toolDuesTableHtml(tool) {
+    const due = S.subs.filter(s => isApprovedUnpaid(s) && toolOf(s) === tool);
+    const byWorker = new Map();
+    due.forEach(s => {
+        if (!byWorker.has(s.worker_id)) byWorker.set(s.worker_id, []);
+        byWorker.get(s.worker_id).push(s);
+    });
+    const list = [...byWorker.entries()].map(([id, rows]) => ({ id, rows, total: sum(rows, calcPrice) }))
+        .sort((a, b) => b.total - a.total);
+    if (!list.length) return emptyBox("مفيش مستحقات على الأداة دي دلوقتي 👌", "🧾");
+
+    return `
+    <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-white/10">
+        <table class="dz-table w-full">
+            <thead class="bg-slate-50 dark:bg-white/[.03]"><tr><th>الموظف</th><th>رقم الكاش</th><th>تسليمات</th><th>Valid</th><th>المستحق</th><th></th></tr></thead>
+            <tbody>${list.map(x => {
+                const w = workerById(x.id);
+                return `<tr>
+                    <td>${workerLink(x.id)}</td>
+                    <td><button type="button" onclick="copyText(unarg('${arg(w?.cash_number || "")}'),'اتنسخ رقم الكاش 📋')" class="font-bold ltr hover:text-indigo-500" title="نسخ">${esc(w?.cash_number || "-")} 📋</button></td>
+                    <td class="num">${x.rows.length}</td>
+                    <td class="font-black text-emerald-500 num">${sum(x.rows, r => Number(r.valid_count || 0))}</td>
+                    <td class="font-black num">${money(x.total)}</td>
+                    <td><button type="button" onclick="payWorkerTool('${arg(x.id)}','${tool}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black">💵 دفع ${TOOLS[tool].name}</button></td>
+                </tr>`;
+            }).join("")}</tbody>
+            <tfoot><tr><td class="font-black">الإجمالي</td><td></td><td class="num font-black">${due.length}</td>
+                <td class="font-black text-emerald-500 num">${sum(due, r => Number(r.valid_count || 0))}</td>
+                <td class="font-black num">${money(sum(due, calcPrice))}</td><td></td></tr></tfoot>
+        </table>
+    </div>`;
+}
+
+function renderToolPage(tool) {
+    const t = TOOLS[tool];
+    const closed = isToolClosed(tool);
+    const pending = S.subs.filter(s => s.status === "pending" && toolOf(s) === tool);
+    const due = S.subs.filter(s => isApprovedUnpaid(s) && toolOf(s) === tool);
+    const weekAgo = Date.now() - 7 * 86400e3;
+    const paidWeek = S.subs.filter(s => toolOf(s) === tool && isPaid(s) && s.paid_at && new Date(s.paid_at).getTime() > weekAgo);
+
+    const controls = isOwner() ? `
+        <div class="mt-5 flex flex-wrap items-center gap-2">
+            <div class="flex items-center gap-2 bg-white/15 rounded-2xl px-3 py-2">
+                <span class="font-bold text-sm">سعر الـ Valid:</span>
+                <input id="priceInput" type="number" step="0.01" min="0" value="${toolPrice(tool)}" class="w-20 bg-white/20 rounded-lg px-2 py-1 text-center font-black outline-none ltr">
+                <span class="text-sm">ج.م</span>
+                <button type="button" onclick="saveToolPrice('${tool}')" class="px-3 py-1.5 rounded-xl bg-white text-slate-900 font-black text-xs">حفظ</button>
+            </div>
+            <button type="button" onclick="toggleTool('${tool}')" class="px-4 py-2.5 rounded-2xl font-black text-sm ${closed ? "bg-red-500 text-white" : "bg-white/15"}">
+                ${closed ? "🔒 مقفولة — افتحها" : "🟢 شغالة — اقفلها"}</button>
+        </div>` : `
+        <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/15 font-black text-sm">
+            ${closed ? "🔒 الأداة مقفولة حالياً" : "🟢 الأداة شغالة"} · السعر ${money(toolPrice(tool))}
+        </div>`;
+
+    return `
+    <div class="rounded-3xl p-6 md:p-8 mb-6 text-white bg-gradient-to-br ${t.grad} shadow-xl relative overflow-hidden">
+        <div class="absolute -left-6 -top-6 text-[120px] opacity-15 leading-none select-none">${t.icon}</div>
+        <p class="text-white/80 font-bold">${isOwner() ? "داش بورد" : "مراجعة"}</p>
+        <h1 class="text-3xl md:text-4xl font-black mt-1">${t.full}</h1>
+        ${controls}
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+        ${statCard({ label: "مستنية مراجعة", value: pending.length, tone: "yellow", icon: "⏳" })}
+        ${statCard({ label: "مستحقات (قيد الحساب)", value: sum(due, calcPrice), money: true, tone: tool === "tayeb" ? "orange" : "purple", icon: "🧾" })}
+        ${statCard({ label: "Valid قيد الحساب", value: sum(due, s => Number(s.valid_count || 0)), tone: "sky", icon: "✅" })}
+        ${statCard({ label: "اتدفع آخر 7 أيام", value: sum(paidWeek, calcPrice), money: true, tone: "emerald", icon: "💸" })}
+    </div>
+
+    <div class="card p-5 md:p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+            <h3 class="text-lg font-black">⏳ طابور المراجعة <span class="text-yellow-500 num">(${pending.length})</span></h3>
+            ${pending.length ? `<button type="button" onclick="approveAll('${tool}')" class="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm">✅ قبول كل المعلق (${pending.length})</button>` : ""}
+        </div>
+        ${pendingListHtml(pending, { showTool: false })}
+    </div>
+
+    ${isOwner() ? `
+    <div class="card p-5 md:p-6 mb-6">
+        <h3 class="text-lg font-black mb-1">🧾 مستحقات كل موظف على ${t.name}</h3>
+        <p class="text-xs text-slate-500 mb-4">تقدر تدفع لموظف ${t.name} بس وتسيب الأداة التانية لوقت تاني</p>
+        ${toolDuesTableHtml(tool)}
+    </div>` : ""}
+
+    <div class="card p-5 md:p-6">
+        <h3 class="text-lg font-black mb-4">📒 كشف حساب ${t.name}</h3>
+        <div id="ledgerBox">${ledgerHtml(tool)}</div>
+    </div>`;
+}
+
+PAGES.owner.yazeed = { render: () => renderToolPage("yazeed") };
+PAGES.owner.tayeb = { render: () => renderToolPage("tayeb") };
+PAGES.supervisor.yazeed = { render: () => renderToolPage("yazeed") };
+PAGES.supervisor.tayeb = { render: () => renderToolPage("tayeb") };
+
+/* =========================================================
+   OWNER — 👥 الموظفين
+========================================================= */
+
+S.workerSearch = "";
+
+function setWorkerSearch(v) {
+    S.workerSearch = v;
+    const box = $("workersGrid");
+    if (box) box.innerHTML = workersGridHtml();
+}
+
+function workersGridHtml() {
+    const q = S.workerSearch.toLowerCase().trim();
+    const list = S.workers.filter(w => !q || (w.full_name || "").toLowerCase().includes(q) || (w.username || "").toLowerCase().includes(q) || (w.cash_number || "").includes(q));
+    if (!list.length) return `<div class="md:col-span-2 xl:col-span-3">${emptyBox("مفيش موظفين مطابقين 😢", "👥")}</div>`;
+
+    return list.map(w => {
+        const subs = S.subs.filter(s => s.worker_id === w.id);
+        const dy = sum(subs.filter(s => isApprovedUnpaid(s) && toolOf(s) === "yazeed"), calcPrice);
+        const dt = sum(subs.filter(s => isApprovedUnpaid(s) && toolOf(s) === "tayeb"), calcPrice);
+        const pend = subs.filter(s => s.status === "pending").length;
+        return `
+        <a href="#/worker/${arg(w.id)}" class="card p-5 block hover:-translate-y-0.5 transition">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-12 h-12 shrink-0 rounded-2xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-black text-xl">${esc((w.full_name || "?").charAt(0))}</div>
+                    <div class="min-w-0">
+                        <p class="font-black truncate">${esc(w.full_name || "-")}</p>
+                        <p class="text-xs text-slate-500 ltr truncate">@${esc(w.username || "-")}</p>
+                    </div>
+                </div>
+                ${w.active ? `<span class="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[11px] font-black">نشط</span>` : `<span class="px-2 py-1 rounded-full bg-red-500/10 text-red-500 text-[11px] font-black">معطل</span>`}
+            </div>
+            <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+                <div class="rounded-xl bg-purple-500/10 py-2"><p class="text-[10px] text-slate-500">🟣 يزيد</p><p class="font-black text-purple-500 text-sm num">${money(dy)}</p></div>
+                <div class="rounded-xl bg-orange-500/10 py-2"><p class="text-[10px] text-slate-500">⚡ الطيب</p><p class="font-black text-orange-500 text-sm num">${money(dt)}</p></div>
+                <div class="rounded-xl bg-yellow-500/10 py-2"><p class="text-[10px] text-slate-500">⏳ معلق</p><p class="font-black text-yellow-500 text-sm num">${pend}</p></div>
+            </div>
+        </a>`;
+    }).join("");
+}
+
+function renderWorkers() {
+    return `
+    ${pageHeader("👥 الموظفين", `${S.workers.length} موظف — ${S.workers.filter(w => w.active).length} نشط`)}
+    <input type="text" value="${esc(S.workerSearch)}" oninput="setWorkerSearch(this.value)" placeholder="🔍 ابحث بالاسم أو اليوزر أو رقم الكاش..." class="input mb-5 md:!w-1/2">
+    <div id="workersGrid" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">${workersGridHtml()}</div>`;
+}
+
+PAGES.owner.workers = {
+    render: renderWorkers,
+    live: () => { const box = $("workersGrid"); if (box) box.innerHTML = workersGridHtml(); }
+};
+
+/* =========================================================
+   OWNER — 👤 صفحة موظف
+========================================================= */
+
+S.wdTab = "yazeed";
+
+function setWdTab(tab, idEnc) {
+    S.wdTab = tab;
+    const box = $("wdBody");
+    if (box) { box.innerHTML = wdBodyHtml(unarg(idEnc)); loadThumbs(box); }
+    document.querySelectorAll("[data-wdtab]").forEach(b => b.className = "chip " + (b.dataset.wdtab === tab ? "chip-active" : "chip-idle"));
+}
+
+function wdRow(r) {
+    const id = arg(r.id);
+    return `
+    <div class="card p-4 flex gap-4">
+        ${r.proof_image ? `<img data-proof="${esc(r.proof_image)}" class="thumb shrink-0" alt="">` : ""}
+        <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2">${statusBadge(r)} ${payBadge(r)} ${toolBadge(r)}</div>
+            <p class="text-xs text-slate-500 mt-1">${fmtDate(r.created_at)}${r.paid_at ? ` · 💵 اتدفع ${fmtDate(r.paid_at)}` : ""}</p>
+            ${reviewedByLine(r)}
+            <div class="flex flex-wrap gap-x-4 mt-2 text-sm">
+                <span>Valid <b class="text-emerald-500 num">${Number(r.valid_count || 0)}</b></span>
+                <span>Locked <b class="text-yellow-500 num">${Number(r.locked_count || 0)}</b></span>
+                <span>السعر <b class="num">${money(calcUnit(r))}</b></span>
+                <span>المبلغ <b class="num">${money(calcPrice(r))}</b></span>
+            </div>
+            ${r.owner_note ? `<p class="text-xs mt-2 text-slate-500">ملاحظة: <b>${esc(r.owner_note)}</b></p>` : ""}
+            <div class="flex flex-wrap gap-2 mt-3">
+                ${r.status === "pending" ? `<button type="button" onclick="reviewSub('${id}','approved')" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-black">✅ قبول</button>
+                    <button type="button" onclick="reviewSub('${id}','rejected')" class="px-3 py-1.5 rounded-xl bg-red-600 text-white text-xs font-black">❌ رفض</button>` : ""}
+                ${isApprovedUnpaid(r) ? `<button type="button" onclick="paySingle('${id}')" class="px-3 py-1.5 rounded-xl bg-sky-600 text-white text-xs font-black">💵 دفع دي</button>` : ""}
+                ${fileButtons(r)}
+                <button type="button" onclick="deleteSub('${id}')" class="px-3 py-1.5 rounded-xl bg-red-500/10 text-red-500 text-xs font-black">🗑️</button>
+            </div>
+        </div>
+    </div>`;
+}
+
+function wdBodyHtml(workerId) {
+    const subs = S.subs.filter(s => s.worker_id === workerId);
+    if (S.wdTab === "paid") {
+        const batches = groupPaymentBatches(subs);
+        if (!batches.length) return emptyBox("مفيش مدفوعات للموظف ده لسه");
+        return `<div class="space-y-3">${batches.map((b, i) => `
+            <details class="card overflow-hidden">
+                <summary class="list-none cursor-pointer p-4 flex items-center justify-between gap-3">
+                    <div><p class="font-black">✅ دفعة ${b.paidAt ? fmtShortDate(b.paidAt) : ""}</p><p class="text-xs text-slate-500">${b.items.length} تسليمة</p></div>
+                    <span class="font-black text-emerald-500 num text-lg">${money(b.total)}</span>
+                </summary>
+                <div class="px-4 pb-4 space-y-3">${b.items.map(wdRow).join("")}</div>
+            </details>`).join("")}</div>`;
+    }
+    let rows = subs.filter(s => !isPaid(s));
+    if (S.wdTab === "yazeed" || S.wdTab === "tayeb") rows = rows.filter(s => toolOf(s) === S.wdTab);
+    if (!rows.length) return emptyBox("مفيش تسليمات حالية هنا 👍");
+    return `<div class="space-y-3">${rows.map(wdRow).join("")}</div>`;
+}
+
+function renderWorkerDetail(workerId) {
+    const w = workerById(workerId);
+    if (!w) return `${pageHeader("الموظف مش موجود")}<a href="#/workers" class="text-indigo-500 font-black">← رجوع للموظفين</a>`;
+
+    const subs = S.subs.filter(s => s.worker_id === workerId);
+    const dy = subs.filter(s => isApprovedUnpaid(s) && toolOf(s) === "yazeed");
+    const dt = subs.filter(s => isApprovedUnpaid(s) && toolOf(s) === "tayeb");
+    const pend = subs.filter(s => s.status === "pending");
+    const paid = subs.filter(isPaid);
+    const idA = arg(workerId);
+    const chip = (val, label) => `<button type="button" data-wdtab="${val}" onclick="setWdTab('${val}','${idA}')" class="chip ${S.wdTab === val ? "chip-active" : "chip-idle"}">${label}</button>`;
+
+    return `
+    <a href="#/workers" class="inline-flex items-center gap-1 text-sm font-black text-slate-500 hover:text-indigo-500 mb-4">→ كل الموظفين</a>
+
+    <div class="card p-5 md:p-7 mb-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-black text-2xl">${esc((w.full_name || "?").charAt(0))}</div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-2xl font-black">${esc(w.full_name || "-")}</h1>
+                        ${w.active ? `<span class="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-black">نشط</span>` : `<span class="px-2 py-1 rounded-full bg-red-500/10 text-red-500 text-xs font-black">معطل</span>`}
+                    </div>
+                    <p class="text-sm text-slate-500 ltr">@${esc(w.username || "-")}</p>
+                    <button type="button" onclick="copyText(unarg('${arg(w.cash_number || "")}'),'اتنسخ رقم الكاش 📋')" class="mt-1 text-sm font-black ltr hover:text-indigo-500">💳 ${esc(w.cash_number || "مفيش رقم")} 📋</button>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="payWorkerTool('${idA}','all')" ${dy.length + dt.length ? "" : "disabled"} class="px-4 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm">💵 دفع الكل (${money(sum(dy, calcPrice) + sum(dt, calcPrice))})</button>
+                <button type="button" onclick="resetWorkerPassword('${idA}')" class="px-4 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm">🔑 باسورد جديد</button>
+                <button type="button" onclick="toggleWorkerActive('${idA}')" class="px-4 py-3 rounded-2xl font-black text-sm ${w.active ? "bg-red-500/10 text-red-500" : "bg-emerald-500/10 text-emerald-500"}">${w.active ? "🚪 تعطيل" : "🔄 تفعيل"}</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+        <div class="rounded-3xl border p-4 md:p-5 bg-purple-500/10 border-purple-500/20">
+            <p class="text-xs md:text-sm font-bold text-slate-500">🟣 مستحقات يزيد</p>
+            <p class="text-2xl font-black mt-2 text-purple-500">${countSpan(sum(dy, calcPrice), true)}</p>
+            ${dy.length ? `<button type="button" onclick="payWorkerTool('${idA}','yazeed')" class="mt-2 px-3 py-1.5 rounded-xl bg-purple-600 text-white text-xs font-black">💵 دفع يزيد</button>` : ""}
+        </div>
+        <div class="rounded-3xl border p-4 md:p-5 bg-orange-500/10 border-orange-500/20">
+            <p class="text-xs md:text-sm font-bold text-slate-500">⚡ مستحقات الطيب</p>
+            <p class="text-2xl font-black mt-2 text-orange-500">${countSpan(sum(dt, calcPrice), true)}</p>
+            ${dt.length ? `<button type="button" onclick="payWorkerTool('${idA}','tayeb')" class="mt-2 px-3 py-1.5 rounded-xl bg-orange-500 text-white text-xs font-black">💵 دفع الطيب</button>` : ""}
+        </div>
+        ${statCard({ label: "قيد المراجعة", value: pend.length, tone: "yellow", icon: "⏳" })}
+        ${statCard({ label: "إجمالي اللي اتدفعله", value: sum(paid, calcPrice), money: true, tone: "emerald", icon: "💸" })}
+    </div>
+
+    <div class="card p-5 md:p-6">
+        <div class="flex flex-wrap gap-2 mb-4">
+            ${chip("yazeed", "🟣 يزيد")}${chip("tayeb", "⚡ الطيب")}${chip("current", "🌍 كل الحالي")}${chip("paid", "📦 الأرشيف (المدفوع)")}
+        </div>
+        <div id="wdBody">${wdBodyHtml(workerId)}</div>
+    </div>`;
+}
+
+PAGES.owner.worker = { render: id => renderWorkerDetail(id) };
+
+function resetWorkerPassword(idEnc) {
+    const id = unarg(idEnc);
+    confirmDialog({
+        title: "باسورد جديد", icon: "🔑",
+        text: `للموظف: ${profileName(id)}\nبعد ما تحفظه ابعتهوله.`,
+        input: { label: "الباسورد الجديد (6 حروف على الأقل):", placeholder: "مثلاً: dz123456", ltr: true },
+        confirmText: "حفظ الباسورد", confirmClass: "bg-indigo-600 text-white",
+        onConfirm: async pass => {
+            pass = (pass || "").trim();
+            if (pass.length < 6) { toast("الباسورد لازم يكون 6 حروف على الأقل", "warning"); return false; }
+            const { error } = await db.rpc("admin_set_worker_password", { p_worker_id: id, p_new_password: pass });
+            if (error) { toast(friendlyError(error), "error"); return false; }
+            S.lastPass = `باسوردك الجديد في DARK ZONE: ${pass}`;
+            openModalHtml(`<div class="text-center">
+                <div class="text-4xl mb-2">✅</div><h3 class="text-xl font-black">اتغير الباسورد</h3>
+                <p class="mt-3 font-black text-lg ltr">${esc(pass)}</p>
+                <button type="button" onclick="copyText(S.lastPass,'اتنسخ 📋')" class="w-full mt-5 py-3 rounded-2xl bg-emerald-600 text-white font-black">📋 نسخ رسالة للموظف</button>
+                <button type="button" onclick="closeTopModal(true)" class="w-full mt-2 py-3 rounded-2xl bg-slate-200 dark:bg-white/10 font-black">تمام</button></div>`);
+        }
+    });
+}
+
+function toggleWorkerActive(idEnc) {
+    const id = unarg(idEnc);
+    const w = workerById(id);
+    if (!w) return;
+    const disabling = w.active;
+    confirmDialog({
+        title: disabling ? "تعطيل الموظف" : "تفعيل الموظف", icon: disabling ? "🚪" : "🔄",
+        text: `${w.full_name || w.username}\n${disabling ? "مش هيقدر يدخل ولا يسلّم لحد ما تفعّله." : "هيقدر يدخل ويسلّم تاني."}`,
+        confirmText: disabling ? "تعطيل" : "تفعيل",
+        confirmClass: disabling ? "bg-red-600 text-white" : "bg-emerald-600 text-white",
+        onConfirm: async () => {
+            const { error } = await db.rpc(disabling ? "disable_worker" : "enable_worker", { p_worker_id: id });
+            if (error) { toast(friendlyError(error), "error"); return; }
+            toast(disabling ? "اتعطل 🚪" : "اتفعل 🔄", "success");
+            await reloadAndRefresh();
+        }
+    });
+}
+
+/* =========================================================
+   OWNER — 💰 المدفوعات والتقفيل
+========================================================= */
+
+S.settle = { mode: "friday", date: "", tool: "all", excluded: new Set() };
+S.histLimit = 15;
+
+const SETTLE_MODES = {
+    friday: "⚡ لحد آخر جمعة",
+    today: "☀️ النهاردة بس",
+    dayOnly: "🎯 يوم معين بس",
+    upto: "📅 لحد يوم معين",
+    all: "🌍 كل المعلق"
+};
+
+function settleScopeText() {
+    const st = S.settle;
+    if (st.mode === "friday") return `لحد ${prettyKey(lastFridayKey())}`;
+    if (st.mode === "today") return `النهاردة ${prettyKey(todayKey())}`;
+    if (st.mode === "dayOnly") return st.date ? `يوم ${prettyKey(st.date)}` : "";
+    if (st.mode === "upto") return st.date ? `لحد ${prettyKey(st.date)}` : "";
+    return "كل المعلق";
+}
+
+// نفس الفلتر بالظبط للعرض وللدفع — اللي بتشوفه هو اللي يتدفع
+function settleRowsAll() {
+    const st = S.settle;
+    let rows = S.subs.filter(isApprovedUnpaid);
+    if (st.tool !== "all") rows = rows.filter(s => toolOf(s) === st.tool);
+
+    if (st.mode === "friday") { const k = lastFridayKey(); rows = rows.filter(s => dayKey(s.created_at) <= k); }
+    else if (st.mode === "today") { const k = todayKey(); rows = rows.filter(s => dayKey(s.created_at) === k); }
+    else if (st.mode === "dayOnly") rows = st.date ? rows.filter(s => dayKey(s.created_at) === st.date) : [];
+    else if (st.mode === "upto") rows = st.date ? rows.filter(s => dayKey(s.created_at) <= st.date) : [];
+    return rows;
+}
+
+function settleGroups() {
+    const map = new Map();
+    settleRowsAll().forEach(s => {
+        if (!map.has(s.worker_id)) map.set(s.worker_id, []);
+        map.get(s.worker_id).push(s);
+    });
+    return [...map.entries()].map(([workerId, rows]) => ({
+        workerId, rows,
+        y: rows.filter(s => toolOf(s) === "yazeed"),
+        t: rows.filter(s => toolOf(s) === "tayeb"),
+        total: sum(rows, calcPrice),
+        selected: !S.settle.excluded.has(workerId)
+    })).sort((a, b) => b.total - a.total);
+}
+
+function setSettle(key, value) {
+    S.settle[key] = value;
+    if (key === "mode" && (value === "dayOnly" || value === "upto") && !S.settle.date) S.settle.date = todayKey();
+    S.settle.excluded = new Set();
+    redrawSettle();
+}
+
+function toggleSettleWorker(idEnc) {
+    const id = unarg(idEnc);
+    if (S.settle.excluded.has(id)) S.settle.excluded.delete(id);
+    else S.settle.excluded.add(id);
+    redrawSettle();
+}
+
+function toggleSettleAll(checked) {
+    S.settle.excluded = checked ? new Set() : new Set(settleGroups().map(g => g.workerId));
+    redrawSettle();
+}
+
+function redrawSettle() {
+    const box = $("settleBox");
+    if (box) box.innerHTML = settleHtml();
+}
+
+function settleHtml() {
+    const st = S.settle;
+    const groups = settleGroups();
+    const selected = groups.filter(g => g.selected);
+    const selRows = selected.flatMap(g => g.rows);
+    const needsDate = st.mode === "dayOnly" || st.mode === "upto";
+
+    const modeChip = m => `<button type="button" onclick="setSettle('mode','${m}')" class="chip ${st.mode === m ? "chip-active" : "chip-idle"}">${SETTLE_MODES[m]}</button>`;
+    const toolChip = (v, l) => `<button type="button" onclick="setSettle('tool','${v}')" class="chip ${st.tool === v ? "chip-active" : "chip-idle"}">${l}</button>`;
+
+    const table = !groups.length ? emptyBox("مفيش مستحقات مقبولة ومش مدفوعة في الفترة دي 👌", "✅") : `
+    <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-white/10">
+        <table class="dz-table w-full">
+            <thead class="bg-slate-50 dark:bg-white/[.03]"><tr>
+                <th><input type="checkbox" ${selected.length === groups.length ? "checked" : ""} onchange="toggleSettleAll(this.checked)" class="w-4 h-4 accent-emerald-600"></th>
+                <th>الموظف</th><th>رقم الكاش</th>
+                ${st.tool !== "tayeb" ? "<th>🟣 يزيد</th>" : ""}${st.tool !== "yazeed" ? "<th>⚡ الطيب</th>" : ""}
+                <th>الإجمالي</th>
+            </tr></thead>
+            <tbody>${groups.map(g => {
+                const w = workerById(g.workerId);
+                return `<tr class="${g.selected ? "" : "opacity-40"}">
+                    <td><input type="checkbox" ${g.selected ? "checked" : ""} onchange="toggleSettleWorker('${arg(g.workerId)}')" class="w-4 h-4 accent-emerald-600"></td>
+                    <td>${workerLink(g.workerId)}<p class="text-[11px] text-slate-400">${g.rows.length} تسليمة</p></td>
+                    <td><button type="button" onclick="copyText(unarg('${arg(w?.cash_number || "")}'),'اتنسخ رقم الكاش 📋')" class="font-bold ltr hover:text-indigo-500">${esc(w?.cash_number || "-")} 📋</button></td>
+                    ${st.tool !== "tayeb" ? `<td><span class="font-black text-purple-500 num">${money(sum(g.y, calcPrice))}</span><p class="text-[11px] text-slate-400 num">${sum(g.y, s => Number(s.valid_count || 0))} Valid</p></td>` : ""}
+                    ${st.tool !== "yazeed" ? `<td><span class="font-black text-orange-500 num">${money(sum(g.t, calcPrice))}</span><p class="text-[11px] text-slate-400 num">${sum(g.t, s => Number(s.valid_count || 0))} Valid</p></td>` : ""}
+                    <td class="font-black text-emerald-500 num text-base">${money(g.total)}</td>
+                </tr>`;
+            }).join("")}</tbody>
+        </table>
+    </div>`;
+
+    return `
+    <div class="space-y-4">
+        <div>
+            <p class="text-xs font-black text-slate-500 mb-2">١. اختار الفترة</p>
+            <div class="flex flex-wrap gap-2">${Object.keys(SETTLE_MODES).map(modeChip).join("")}</div>
+            ${needsDate ? `<input type="date" value="${esc(st.date)}" onchange="S.settle.date=this.value; S.settle.excluded=new Set(); redrawSettle()" class="input ltr !w-auto mt-3">` : ""}
+            <div class="flex flex-wrap gap-2 mt-3">${toolChip("all", "يزيد + الطيب")}${toolChip("yazeed", "🟣 يزيد بس")}${toolChip("tayeb", "⚡ الطيب بس")}</div>
+            <p class="text-xs text-slate-500 mt-3">📅 النطاق: <b>${esc(settleScopeText() || "اختار تاريخ")}</b> — بيحسب المقبول اللي لسه ماتدفعش بس، واللي اتدفع قبل كده عمره ما بيتحسب تاني.</p>
+        </div>
+
+        <div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+                <p class="text-xs font-black text-slate-500">٢. راجع (شيل العلامة من أي موظف مش عايز تدفعله دلوقتي)</p>
+                ${groups.length ? `<button type="button" onclick="exportSettleExcel()" class="px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-black">📊 تحميل Excel</button>` : ""}
+            </div>
+            ${table}
+        </div>
+
+        <div class="rounded-2xl bg-emerald-500/10 border border-emerald-500/25 p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+                <p class="text-xs font-black text-slate-500">٣. أكّد الدفع</p>
+                <p class="text-2xl font-black text-emerald-500 num mt-1">${money(sum(selRows, calcPrice))}</p>
+                <p class="text-xs text-slate-500">${selected.length} موظف · ${selRows.length} تسليمة</p>
+            </div>
+            <button type="button" onclick="confirmSettlement()" ${selRows.length ? "" : "disabled"} class="px-6 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-lg shadow-lg shadow-emerald-600/25">💸 تأكيد الدفع ونقل للأرشيف</button>
+        </div>
+    </div>`;
+}
+
+function confirmSettlement() {
+    const groups = settleGroups().filter(g => g.selected);
+    const rows = groups.flatMap(g => g.rows);
+    if (!rows.length) return;
+    const scope = settleScopeText();
+    confirmDialog({
+        title: "تأكيد التقفيل", icon: "💸",
+        text: `${scope}\n${groups.length} موظف — ${rows.length} تسليمة\nالإجمالي: ${money(sum(rows, calcPrice))}\n\n📦 التسليمات دي بس هتتنقل للأرشيف، والباقي هيفضل قيد الحساب.`,
+        confirmText: "تأكيد الدفع 💸", confirmClass: "bg-emerald-600 text-white",
+        onConfirm: async () => {
+            const ok = await payRows(rows, scope);
+            if (ok) S.settle.excluded = new Set();
+        }
+    });
+}
+
+function exportSettleExcel() {
+    if (typeof XLSX === "undefined") return toast("مكتبة Excel ماتحملتش، جرّب تاني", "error");
+    const groups = settleGroups().filter(g => g.selected);
+    const data = groups.map(g => {
+        const w = workerById(g.workerId);
+        return {
+            "الموظف": w?.full_name || "",
+            "اليوزر": w?.username || "",
+            "رقم الكاش": w?.cash_number || "",
+            "يزيد Valid": sum(g.y, s => Number(s.valid_count || 0)),
+            "يزيد (ج.م)": sum(g.y, calcPrice),
+            "الطيب Valid": sum(g.t, s => Number(s.valid_count || 0)),
+            "الطيب (ج.م)": sum(g.t, calcPrice),
+            "الإجمالي (ج.م)": g.total,
+            "عدد التسليمات": g.rows.length
+        };
+    });
+    data.push({
+        "الموظف": "الإجمالي", "اليوزر": "", "رقم الكاش": "",
+        "يزيد Valid": sum(data, r => r["يزيد Valid"]), "يزيد (ج.م)": sum(data, r => r["يزيد (ج.م)"]),
+        "الطيب Valid": sum(data, r => r["الطيب Valid"]), "الطيب (ج.م)": sum(data, r => r["الطيب (ج.م)"]),
+        "الإجمالي (ج.م)": sum(data, r => r["الإجمالي (ج.م)"]), "عدد التسليمات": sum(data, r => r["عدد التسليمات"])
+    });
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws["!cols"] = [{ wch: 22 }, { wch: 16 }, { wch: 14 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 14 }, { wch: 12 }];
+    const wb = XLSX.utils.book_new();
+    wb.Workbook = { Views: [{ RTL: true }] };
+    XLSX.utils.book_append_sheet(wb, ws, "التقفيل");
+    XLSX.writeFile(wb, `DARKZONE_تقفيل_${todayKey()}.xlsx`);
+}
+
+/* ---------- سجل المدفوعات ---------- */
+
+function historyHtml() {
+    const batches = groupPaymentBatches(S.subs);
+    if (!batches.length) return emptyBox("لسه مفيش مدفوعات", "📦");
+    S.histMsgs = {};
+    const shown = batches.slice(0, S.histLimit);
+
+    return `<div class="space-y-3">${shown.map((b, i) => {
+        const byWorker = new Map();
+        b.items.forEach(s => { if (!byWorker.has(s.worker_id)) byWorker.set(s.worker_id, []); byWorker.get(s.worker_id).push(s); });
+        const workers = [...byWorker.entries()].sort((a, c) => sum(c[1], calcPrice) - sum(a[1], calcPrice));
+        return `
+        <details class="card overflow-hidden">
+            <summary class="list-none cursor-pointer p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-xl">💸</div>
+                    <div>
+                        <p class="font-black">${b.paidAt ? fmtDate(b.paidAt) : "دفعة"}</p>
+                        <p class="text-xs text-slate-500">${workers.length} موظف · ${b.items.length} تسليمة</p>
+                    </div>
+                </div>
+                <span class="text-xl font-black text-emerald-500 num">${money(b.total)}</span>
+            </summary>
+            <div class="px-4 pb-4 space-y-2">${workers.map(([wid, rows], j) => {
+                S.histMsgs[`${i}_${j}`] = waMessage(wid, rows, b.paidAt ? fmtShortDate(b.paidAt) : "");
+                return `<div class="rounded-xl bg-slate-50 dark:bg-white/[.03] px-3 py-2.5 flex flex-wrap items-center justify-between gap-2">
+                    <div>${workerLink(wid)} <span class="text-xs text-slate-500">· ${rows.length} تسليمة</span></div>
+                    <div class="flex items-center gap-2">
+                        <b class="num">${money(sum(rows, calcPrice))}</b>
+                        <button type="button" onclick="copyText(S.histMsgs['${i}_${j}'],'اتنسخت الرسالة 📋')" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[11px] font-black">📋 واتساب</button>
+                    </div>
+                </div>`;
+            }).join("")}</div>
+        </details>`;
+    }).join("")}
+    ${batches.length > shown.length ? `<button type="button" onclick="S.histLimit+=15; $('historyBox').innerHTML=historyHtml()" class="w-full py-3 rounded-2xl bg-slate-100 dark:bg-white/5 font-black text-sm">عرض أقدم (${batches.length - shown.length})</button>` : ""}
+    </div>`;
+}
+
+function renderPayments() {
+    const batches = groupPaymentBatches(S.subs);
+    const last = batches[0];
+    const due = S.subs.filter(isApprovedUnpaid);
+    const lastWorkers = last ? new Set(last.items.map(s => s.worker_id)).size : 0;
+
+    return `
+    ${pageHeader("💰 المدفوعات والتقفيل", "تقفيل الأسبوع وسجل كل الدفعات")}
+
+    <div class="grid md:grid-cols-3 gap-4 mb-6">
+        <div class="rounded-3xl p-5 md:p-6 text-white bg-gradient-to-br from-emerald-600 to-teal-600 shadow-xl md:col-span-2">
+            <p class="text-white/80 font-bold text-sm">آخر تقفيل</p>
+            ${last ? `
+            <p class="text-2xl md:text-3xl font-black mt-1">${fmtDate(last.paidAt)}</p>
+            <p class="text-white/90 mt-1">بإجمالي <b class="num">${money(last.total)}</b> لـ ${lastWorkers} موظف (${last.items.length} تسليمة)</p>`
+            : `<p class="text-xl font-black mt-1">لسه مفيش تقفيل</p>`}
+        </div>
+        ${statCard({ label: "إجمالي المستحق دلوقتي", value: sum(due, calcPrice), money: true, tone: "sky", icon: "🧾", sub: `${new Set(due.map(s => s.worker_id)).size} موظف` })}
+    </div>
+
+    <div class="card p-5 md:p-6 mb-6">
+        <h3 class="text-lg font-black mb-4">📊 تقفيل الحساب</h3>
+        <div id="settleBox">${settleHtml()}</div>
+    </div>
+
+    <div class="card p-5 md:p-6 mb-6">
+        <h3 class="text-lg font-black mb-1">📜 سجل المدفوعات</h3>
+        <p class="text-xs text-slate-500 mb-4">كل دفعة دفعتها — إمتى ولمين وكام. مرجعك لو حد قال "مااستلمتش".</p>
+        <div id="historyBox">${historyHtml()}</div>
+    </div>
+
+    <details class="card overflow-hidden">
+        <summary class="list-none cursor-pointer p-5 md:p-6 flex items-center justify-between gap-3">
+            <div>
+                <h3 class="text-lg font-black">🗑️ المهملات — ملفات التسليمات المدفوعة</h3>
+                <p class="text-xs text-slate-500 mt-1">ملفات الموظفين بتتنقل هنا بعد الدفع — إنت بس اللي بتشوفها، والموظف خلاص مايقدرش يوصلها.</p>
+            </div>
+            <span class="shrink-0 px-3 py-1 rounded-full bg-slate-500/10 text-slate-500 text-xs font-black num">${S.subs.filter(s => isPaid(s) && (s.work_file || s.proof_image)).length}</span>
+        </summary>
+        <div id="trashBox" class="px-5 md:px-6 pb-6">${trashHtml()}</div>
+    </details>`;
+}
+
+/* ---------- المهملات (ملفات التسليمات المدفوعة) ---------- */
+
+S.trashLimit = 20;
+
+function trashHtml() {
+    const rows = S.subs
+        .filter(s => isPaid(s) && (s.work_file || s.proof_image))
+        .sort((a, b) => new Date(b.paid_at || b.created_at) - new Date(a.paid_at || a.created_at));
+
+    if (!rows.length) return emptyBox("مفيش ملفات في المهملات", "🗑️");
+
+    const shown = rows.slice(0, S.trashLimit);
+    return `
+    <div class="flex items-center justify-between mb-3">
+        <p class="text-xs text-slate-500">${rows.length} تسليمة ليها ملفات محفوظة</p>
+        <button type="button" onclick="purgeAllTrash()" class="px-3 py-1.5 rounded-xl bg-red-500/10 text-red-500 text-xs font-black">🧹 تفريغ المهملات كلها</button>
+    </div>
+    <div class="space-y-2">${shown.map(r => `
+        <div class="rounded-xl bg-slate-50 dark:bg-white/[.03] px-3 py-2.5 flex flex-wrap items-center justify-between gap-2">
+            <div class="min-w-0">
+                ${workerLink(r.worker_id)}
+                <span class="text-xs text-slate-500">· ${TOOLS[toolOf(r)].name} · ${fmtDate(r.created_at)}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                ${fileButtons(r)}
+                <button type="button" onclick="purgeFiles('${arg(r.id)}')" class="px-2.5 py-1 rounded-lg bg-red-500/10 text-red-500 text-[11px] font-black">🗑️ حذف نهائي</button>
+            </div>
+        </div>`).join("")}</div>
+    ${rows.length > shown.length ? `<button type="button" onclick="S.trashLimit+=20; $('trashBox').innerHTML=trashHtml(); loadThumbs($('trashBox'))" class="w-full mt-3 py-2.5 rounded-xl bg-slate-100 dark:bg-white/5 font-black text-sm">عرض أقدم (${rows.length - shown.length})</button>` : ""}`;
+}
+
+async function doPurge(row) {
+    // نمسح الملفات من الستوراج الأول، وبعدها نشيل مسارها من التسليمة (الأرقام بتفضل)
+    const removals = [];
+    if (row.work_file) removals.push(db.storage.from("work-files").remove([row.work_file]));
+    if (row.proof_image) removals.push(db.storage.from("proofs").remove([row.proof_image]));
+    await Promise.allSettled(removals);
+    const { error } = await db.rpc("owner_clear_submission_files", { p_submission_id: row.id });
+    return error;
+}
+
+function purgeFiles(idEnc) {
+    const id = unarg(idEnc);
+    const row = S.subs.find(s => s.id === id);
+    if (!row) return;
+    confirmDialog({
+        title: "حذف الملفات نهائياً", icon: "🗑️",
+        text: `${profileName(row.worker_id)} — ${fmtDate(row.created_at)}\nهيتمسح ملف التكست وصورة الاتشيكر خالص ومش هيرجعوا.\nالأرقام والمبلغ هيفضلوا في السجل زي ما هم.`,
+        confirmText: "حذف نهائي", confirmClass: "bg-red-600 text-white",
+        onConfirm: async () => {
+            const err = await doPurge(row);
+            if (err) { toast(friendlyError(err), "error"); return; }
+            toast("اتمسحت الملفات 🗑️", "success");
+            await reloadAndRefresh();
+        }
+    });
+}
+
+function purgeAllTrash() {
+    const rows = S.subs.filter(s => isPaid(s) && (s.work_file || s.proof_image));
+    if (!rows.length) return toast("المهملات فاضية", "info");
+    confirmDialog({
+        title: "تفريغ المهملات كلها", icon: "🧹",
+        text: `هتتمسح ملفات ${rows.length} تسليمة مدفوعة خالص ومش هترجع.\nكل الأرقام والمبالغ هتفضل في السجل زي ما هي.`,
+        confirmText: `حذف كل الملفات (${rows.length})`, confirmClass: "bg-red-600 text-white",
+        onConfirm: async () => {
+            let ok = 0, fail = 0;
+            for (const r of rows) { const err = await doPurge(r); if (err) fail++; else ok++; }
+            toast(fail ? `اتمسح ${ok} و ${fail} فشلوا` : `🧹 اتمسحت ملفات ${ok} تسليمة`, fail ? "warning" : "success");
+            await reloadAndRefresh();
+        }
+    });
+}
+
+PAGES.owner.payments = {
+    render: renderPayments,
+    live: () => {
+        // نحدّث الأرقام من غير ما نقفل اللي فاتحه أو نبوّظ اختياراتك
+        if (modalStack.length || document.querySelector("#historyBox details[open]")) return;
+        redrawSettle();
+    }
+};
+
+/* =========================================================
+   ENGLISH MODE
+   الصفحات مكتوبة بالعربي، ولما تختار EN بنترجم أي نص
+   بيظهر على الشاشة من القاموس ده (حتى النصوص اللي بتظهر بعدين).
+   أي حاجة مش في القاموس (زي أسامي الموظفين) بتفضل زي ما هي.
+========================================================= */
+
+const EN = {
+    // ----- المهملات -----
+    "المهملات — ملفات التسليمات المدفوعة": "Trash — paid submissions' files",
+    "ملفات الموظفين بتتنقل هنا بعد الدفع — إنت بس اللي بتشوفها، والموظف خلاص مايقدرش يوصلها": "Workers' files move here after payment — only you can see them; the worker can no longer access them",
+    "مفيش ملفات في المهملات": "No files in the trash",
+    "تسليمة ليها ملفات محفوظة": "submissions with saved files",
+    "تفريغ المهملات كلها": "Empty the whole trash", "حذف نهائي": "Delete permanently",
+    "حذف الملفات نهائياً": "Delete files permanently",
+    "هيتمسح ملف التكست وصورة الاتشيكر خالص ومش هيرجعوا": "The text file and the checker image will be deleted for good",
+    "الأرقام والمبلغ هيفضلوا في السجل زي ما هم": "The numbers and amount stay in the record as they are",
+    "اتمسحت الملفات": "Files deleted", "المهملات فاضية": "The trash is empty",
+    "هتتمسح ملفات": "Files of", "تسليمة مدفوعة خالص ومش هترجع": "paid submissions will be deleted for good",
+    "كل الأرقام والمبالغ هتفضل في السجل زي ما هي": "All numbers and amounts stay in the record",
+    "حذف كل الملفات": "Delete all files", "اتمسح": "Deleted", "اتمسحت ملفات": "Deleted files of",
+    // ----- عام / دخول -----
+    "مكان يليق بشغلك": "A place that matches your work",
+    "تعبك محسوب.. وإنجازك مقدّر": "Your effort counts.. your achievement matters",
+    "تسجيل الدخول": "Login", "إنشاء حساب": "Create Account", "البريد الإلكتروني": "Email",
+    "كلمة المرور": "Password", "نسيت كلمة المرور؟": "Forgot password?", "دخول": "Login",
+    "الاسم الكامل": "Full Name", "اسمك": "Your name", "اسم المستخدم": "Username",
+    "حروف إنجليزي وأرقام و": "English letters, numbers,", "و . بس": "and . only",
+    "رقم الكاش": "Cash Number", "أحرف على الأقل": "characters minimum", "إنشاء الحساب": "Create Account",
+    "خروج": "Logout", "عطّر لسانك بذكر الله": "A daily reminder", "جمعة مباركة طيبة": "Jumu'ah Mubarak",
+    "يزيد": "Yazeed", "أداة يزيد": "Yazeed Tool", "الطيب": "Tayeb", "أداة الطيب": "Tayeb Tool",
+    "عامل غير معروف": "Unknown worker",
+    "الإيميل أو الباسورد غلط، أو الحساب لسه ماتأكدش": "Wrong email or password, or the account isn't confirmed yet",
+    "لازم تأكد الإيميل الأول من الرسالة اللي وصلتك": "Please confirm your email first from the message you received",
+    "الإيميل ده متسجل قبل كده": "This email is already registered",
+    "الملف ده اتسلّم قبل كده، مينفعش يتسلّم تاني": "This file was already submitted, it can't be submitted again",
+    "مشكلة في النت، جرّب تاني": "Network problem, try again", "حصل خطأ، جرّب تاني": "Something went wrong, try again",
+    "الأحد": "Sun", "الإثنين": "Mon", "الثلاثاء": "Tue", "الأربعاء": "Wed", "الخميس": "Thu", "الجمعة": "Fri", "السبت": "Sat",
+    "ج.م": "EGP",
+    "تأكيد": "Confirm", "إلغاء": "Cancel", "الملف غير موجود": "File not found", "اتنسخ": "Copied",
+    "جاري الدخول": "Logging in", "اكتب اسمك صح": "Enter your name correctly", "من غير رموز": "no symbols",
+    "من": "from", "لـ": "for", "رقم الكاش لازم يكون": "Cash number must be", "رقم ويبدأ بـ": "digits starting with",
+    "جاري إنشاء الحساب": "Creating account", "تم إنشاء الحساب بنجاح": "Account created successfully",
+    "تم إنشاء الحساب": "Account created", "راجع إيميلك عشان تفعّله، وبعدها سجّل دخول": "Check your email to activate it, then log in",
+    "ولا يهمك": "No worries", "كلّم الأدمن، وهو هيعملك باسورد جديد على طول": "Contact the admin and they'll set a new password for you right away",
+    "تمام": "OK", "الحساب ده متعطل من الإدارة": "This account was disabled by the administration",
+    "الأونر": "Owner", "مشرف": "Supervisor", "موظف": "Worker", "تم تسجيل الخروج": "Logged out",
+
+    // ----- التنقل -----
+    "تسليم يزيد": "Yazeed Submit", "تسليم الطيب": "Tayeb Submit", "مستحقاتي وحسابي": "My Earnings & Account",
+    "مستحقاتي": "My Earnings", "نظرة عامة": "Overview", "الرئيسية": "Home", "الموظفين": "Workers",
+    "المدفوعات والتقفيل": "Payments & Settlement", "المدفوعات": "Payments",
+    "مراجعة يزيد": "Review Yazeed", "مراجعة الطيب": "Review Tayeb",
+
+    // ----- الموقع مقفول -----
+    "الموقع مغلق مؤقتًا": "Site temporarily closed",
+    "الموقع متوقف حاليًا لفترة مؤقتة، وهيرجع يشتغل أول ما الإدارة تفتحه": "The site is paused for now and will be back as soon as the administration opens it",
+    "الصفحة بتتحدث لوحدها": "This page refreshes automatically",
+    "الحساب ده اتعطل من الإدارة": "This account was disabled by the administration",
+    "وصلت": "Received", "تسليمة جديدة": "new submission(s)",
+    "تقبل الله منا ومنكم صالح الأعمال": "May Allah accept from us and you 🤍",
+
+    // ----- الحالات -----
+    "مقبول": "Approved", "مرفوض": "Rejected", "قيد المراجعة": "Under Review", "تم الدفع": "Paid",
+    "قيد الحساب": "Pending Payment", "اتقبلت": "Approved", "اترفضت": "Rejected", "بواسطة": "by",
+    "اتقبلت بواسطة الإدارة": "Approved by the administration", "اترفضت بواسطة الإدارة": "Rejected by the administration",
+    "الإدارة": "the administration", "النهاردة": "Today",
+
+    // ----- التشجيع -----
+    "تسلم إيدك يا بطل": "Great job, champ", "شغلك وصل": "your work arrived",
+    "ربنا يباركلك في تعبك": "God bless your effort", "كمّل كده": "keep it up",
+    "إنت كده ماشي صح": "You're on the right track", "عاش": "well done",
+    "شغل نضيف ومظبوط": "Clean, accurate work", "تسلم": "thanks", "مجهودك محسوب ومتقدّر": "Your effort counts and is appreciated",
+    "كل تسليمة بتقربك لهدفك": "Every submission brings you closer to your goal", "عاش يا وحش": "Beast mode",
+    "كمّل على كده": "keep going", "تعبك مش هيروح على الفاضي": "Your hard work won't go to waste",
+
+    // ----- صفحة التسليم -----
+    "أهلاً": "Hi", "سعر الـ": "Rate per", "النهاردة:": "today:",
+    "مستحقك": "Your earnings", "اتقبل ولسه ماتدفعش": "approved, not paid yet",
+    "تسليمة مستنية المراجعة": "submission(s) awaiting review", "المبلغ": "Amount", "ملاحظة الإدارة": "Admin note",
+    "مفيش تسليمات حالية": "No current submissions", "ابعت أول تسليمة وابدأ": "send your first one and start",
+    "متوقفة مؤقتاً": "is paused", "هتفتح تاني أول ما الإدارة تشغّلها، والصفحة بتتحدث لوحدها": "It will reopen as soon as the administration enables it — this page refreshes automatically",
+    "تسليم شغل جديد": "New Submission", "ملف": "File", "صورة الـ": "Image:", "تقدر تلصق سكرين": "You can paste a screenshot",
+    "المعاينة": "Preview", "تم لصق السكرين بنجاح": "Screenshot pasted",
+    "إرسال التسليمة": "Submit", "تسليماتي الحالية على": "My current submissions on",
+    "الأرشيف والمدفوعات": "Archive & payments",
+    "التسليم متوقف مؤقتاً بسبب أخطاء متكررة": "Submitting is paused because of repeated errors",
+    "راجع شغلك كويس وجرّب بعد": "Review your work and try again in",
+    "تسليمتك وصلت وهتتراجع قريب": "Your submission arrived and will be reviewed soon",
+    "الأداة": "Tool", "لما تتقبل": "When approved", "حاضر، هراجع": "OK, I'll check",
+    "اكتب أرقام صحيحة في": "Enter valid numbers in", "و": "and",
+    "اختار ملف الـ": "Choose the", "اختار صورة الـ": "Choose the", "ملف التيكست فاضي": "The text file is empty",
+    "كبير جداً": "is too large", "الحد": "max", "ميجا": "MB", "لازم الملف يكون": "The file must be",
+    "لازم تكون صورة": "must be an image", "الصورة كبيرة جداً": "The image is too large",
+    "بنتأكد من حالة الموقع": "Checking site status", "الموقع اتقفل دلوقتي": "The site was just closed",
+    "اتقفلت دلوقتي": "was just closed", "الـ": "", "بيراجع الصورة": "is checking the image",
+    "في خطأ في التسليمة": "There's an error in the submission",
+    "برجاء التأكد من ملف التكست وصورة الاتشيكر": "Please check the text file and the checker image",
+    "وجرّب تاني": "and try again", "الصورة مش واضحة": "The image isn't clear",
+    "ارفع صورة أوضح للاتشيكر وجرّب تاني": "Upload a clearer checker image and try again",
+    "جاري رفع التسليمة": "Uploading submission", "التسليمة ماتبعتتش": "Submission not sent",
+
+    // ----- الإشعارات -----
+    "اتدفعلك": "You were paid", "تسليمة اتنقلت للأرشيف": "submission(s) moved to the archive",
+    "تفاصيلها في": "details in", "تسليمتك اتقبلت": "Your submission was approved",
+    "تسليمات اتقبلت": "submissions approved", "اتضافوا لمستحقاتك": "added to your earnings",
+    "تسليمة اترفضت": "submission rejected", "تسليمات اترفضت": "submissions rejected",
+    "السبب": "Reason", "في جديد ليك": "You have updates",
+
+    // ----- مستحقاتي -----
+    "مفيش مستحقات قيد الحساب دلوقتي": "No pending payments right now",
+    "لسه مفيش مدفوعات في الأرشيف": "No payments in the archive yet",
+    "دفعة": "Payment", "تسليمة": "submission(s)", "إجمالي": "Total",
+    "حسابك كله في مكان واحد": "Your whole account in one place",
+    "إجمالي مستحقاتك": "Your total earnings", "شغلك آخر": "Your work, last", "أيام": "days",
+    "الكل": "All", "حسابي": "My Account", "الاسم": "Name", "حفظ": "Save",
+    "تغيير الباسورد": "Change Password", "الباسورد الجديد": "New password", "أكّد الباسورد": "Confirm password",
+    "حفظ الباسورد": "Save Password", "تسجيل خروج": "Logout", "تم حفظ رقم الكاش": "Cash number saved",
+    "الباسورد لازم يكون": "Password must be", "حروف على الأقل": "characters minimum",
+    "الباسوردين مش زي بعض": "Passwords don't match", "جاري الحفظ": "Saving", "تم تغيير الباسورد": "Password changed",
+
+    // ----- المراجعة -----
+    "قبول": "Approve", "رفض": "Reject", "مفيش تسليمات مستنية مراجعة": "No submissions awaiting review",
+    "التسليمة دي اتراجعت قبل كده": "This submission was already reviewed",
+    "قبول التسليمة": "Approve submission", "رفض التسليمة": "Reject submission",
+    "سبب الرفض": "Rejection reason", "هيظهر للموظف": "shown to the worker", "مثلاً": "e.g.",
+    "الصورة مش مطابقة للملف": "image doesn't match the file", "تم القبول": "Approved", "تم الرفض": "Rejected",
+    "مفيش تسليمات معلقة": "No pending submissions", "قبول كل المعلق": "Approve all pending",
+    "هتقبل": "You'll approve", "على": "on", "بإجمالي": "totaling", "قبول الكل": "Approve all",
+    "اتقبل": "Approved", "فشلوا": "failed",
+
+    // ----- الدفع -----
+    "اتحولك": "Sent to you", "تم الدفع ونقل التسليمات للأرشيف": "Paid and moved to the archive",
+    "انسخ الرسالة وابعتها للموظف على واتساب": "Copy the message and send it to the worker on WhatsApp",
+    "اتنسخت الرسالة": "Message copied", "نسخ رسالة الواتساب": "Copy WhatsApp message",
+    "اتنسخوا كلهم": "All copied", "نسخ الكل": "Copy all", "اتدفع": "Paid",
+    "الباقي كان اتدفع أو اتغيرت حالته": "the rest were already paid or changed",
+    "مفيش مستحقات للموظف ده": "No earnings for this worker", "كل الأدوات": "All tools",
+    "دفع": "Pay", "تأكيد الدفع": "Confirm payment", "دفع التسليمة دي": "Pay this submission",
+    "تسليمة واحدة": "single submission", "حذف التسليمة نهائياً": "Delete submission permanently",
+    "مش هتقدر ترجّعها تاني": "You can't undo this", "حذف": "Delete", "اتحذفت": "Deleted",
+
+    // ----- إعدادات -----
+    "قفل الموقع": "Close site", "فتح الموقع": "Open site",
+    "الموظفين مش هيقدروا يسلّموا لحد ما تفتحه تاني": "Workers can't submit until you open it again",
+    "الموظفين هيقدروا يسلّموا تاني": "Workers will be able to submit again",
+    "الموقع اتقفل": "Site closed", "الموقع اتفتح": "Site opened", "قفل": "Close", "فتح": "Open",
+    "اتقفلت": "closed", "اتفتحت": "opened", "اكتب سعر صحيح": "Enter a valid price",
+    "تغيير سعر": "Change rate for", "السعر الجديد": "New rate", "للـ": "per",
+    "هيتطبق على التسليمات الجديدة بس": "Applies to new submissions only", "حفظ السعر": "Save rate",
+    "اتحفظ السعر": "Rate saved", "مفيش ملفات": "No files", "جاري تجميع": "Collecting",
+    "فشل تحميل الملفات": "Failed to download files", "اتحمل": "Downloaded",
+
+    // ----- الأونر -----
+    "مقفولة": "Closed", "شغالة": "Open", "السعر": "Rate", "معلق": "Pending", "مستحقات": "Earnings",
+    "أهلاً يا ريس": "Welcome, boss", "كل حاجة في الموقع قدامك": "Everything on the site at a glance",
+    "الموقع مقفول": "Site closed", "افتحه": "open it", "الموقع مفتوح": "Site open", "اقفله": "close it",
+    "مستنية مراجعة": "Awaiting review", "مستحقات يزيد": "Yazeed earnings", "مستحقات الطيب": "Tayeb earnings",
+    "اتدفع آخر": "Paid in the last", "آخر": "Last", "يوم": "days",
+    "المراجعات المعلقة": "Pending reviews", "من الأداتين": "from both tools", "الأحدث فوق": "newest first",
+    "كمان": "more", "افتح صفحة": "open the page", "أو": "or", "مدفوع": "Paid", "اليوم ده": "this day",
+    "مفيش تسليمات بالفلتر ده": "No submissions match this filter", "الموظف": "Worker", "التاريخ": "Date",
+    "الحالة": "Status", "الملفات": "Files", "بيظهر أول": "Showing first",
+    "استخدم فلتر التاريخ عشان توصل للباقي": "use the date filter to reach the rest",
+    "اختار يوم من التاريخ الأول": "Pick a day from the date filter first",
+    "مفيش مستحقات على الأداة دي دلوقتي": "No earnings on this tool right now",
+    "تسليمات": "Submissions", "المستحق": "Due", "اتنسخ رقم الكاش": "Cash number copied", "نسخ": "Copy",
+    "الإجمالي": "Total", "افتحها": "open it", "اقفلها": "close it",
+    "الأداة مقفولة حالياً": "Tool is closed", "الأداة شغالة": "Tool is open", "داش بورد": "Dashboard",
+    "مراجعة": "Review", "طابور المراجعة": "Review queue", "مستحقات كل موظف على": "Earnings per worker on",
+    "تقدر تدفع لموظف": "You can pay a worker", "بس وتسيب الأداة التانية لوقت تاني": "only and leave the other tool for later",
+    "كشف حساب": "Ledger", "مفيش موظفين مطابقين": "No matching workers", "نشط": "Active", "معطل": "Disabled",
+    "ابحث بالاسم أو اليوزر أو رقم الكاش": "Search by name, username or cash number",
+    "ملاحظة": "Note", "دفع دي": "Pay this", "مفيش مدفوعات للموظف ده لسه": "No payments for this worker yet",
+    "مفيش تسليمات حالية هنا": "No current submissions here", "الموظف مش موجود": "Worker not found",
+    "رجوع للموظفين": "Back to workers", "كل الموظفين": "All workers", "مفيش رقم": "No number",
+    "دفع الكل": "Pay all", "باسورد جديد": "New password", "تعطيل": "Disable", "تفعيل": "Enable",
+    "دفع يزيد": "Pay Yazeed", "دفع الطيب": "Pay Tayeb", "إجمالي اللي اتدفعله": "Total paid to them",
+    "كل الحالي": "All current", "الأرشيف": "Archive", "المدفوع": "Paid", "للموظف": "For worker",
+    "بعد ما تحفظه ابعتهوله": "Send it to them after saving", "باسوردك الجديد في": "Your new password on",
+    "اتغير الباسورد": "Password changed", "نسخ رسالة للموظف": "Copy message for worker",
+    "تعطيل الموظف": "Disable worker", "تفعيل الموظف": "Enable worker",
+    "مش هيقدر يدخل ولا يسلّم لحد ما تفعّله": "They can't log in or submit until you enable them",
+    "هيقدر يدخل ويسلّم تاني": "They'll be able to log in and submit again", "اتعطل": "Disabled", "اتفعل": "Enabled",
+
+    // ----- التقفيل -----
+    "لحد آخر جمعة": "Up to last Friday", "النهاردة بس": "Today only", "يوم معين بس": "Specific day only",
+    "لحد يوم معين": "Up to a specific day", "كل المعلق": "All pending", "لحد": "up to",
+    "مفيش مستحقات مقبولة ومش مدفوعة في الفترة دي": "No approved unpaid earnings in this period",
+    "١. اختار الفترة": "1. Choose the period", "يزيد بس": "Yazeed only", "الطيب بس": "Tayeb only",
+    "النطاق": "Range", "اختار تاريخ": "pick a date",
+    "بيحسب المقبول اللي لسه ماتدفعش بس، واللي اتدفع قبل كده عمره ما بيتحسب تاني": "Counts approved unpaid work only — anything already paid is never counted again",
+    "٢. راجع": "2. Review", "شيل العلامة من أي موظف مش عايز تدفعله دلوقتي": "untick any worker you don't want to pay now",
+    "تحميل": "Download", "٣. أكّد الدفع": "3. Confirm payment", "تأكيد الدفع ونقل للأرشيف": "Confirm payment & archive",
+    "تأكيد التقفيل": "Confirm settlement",
+    "التسليمات دي بس هتتنقل للأرشيف، والباقي هيفضل قيد الحساب": "Only these submissions move to the archive; the rest stay pending",
+    "مكتبة": "The", "ماتحملتش، جرّب تاني": "library didn't load, try again",
+    "اليوزر": "Username", "عدد التسليمات": "Submissions", "التقفيل": "Settlement", "تقفيل": "Settlement",
+    "لسه مفيش مدفوعات": "No payments yet", "واتساب": "WhatsApp", "عرض أقدم": "Show older",
+    "تقفيل الأسبوع وسجل كل الدفعات": "Weekly settlement and full payment history",
+    "آخر تقفيل": "Last settlement", "لسه مفيش تقفيل": "No settlement yet",
+    "إجمالي المستحق دلوقتي": "Total due now", "تقفيل الحساب": "Settle accounts", "سجل المدفوعات": "Payment history",
+    "كل دفعة دفعتها": "Every payment you made", "إمتى ولمين وكام. مرجعك لو حد قال": "when, to whom and how much. Your reference if someone says",
+    "مااستلمتش": "I didn't receive it",
+    "الـ AI بيراجع الصورة": "AI is checking the image",
+    "وتسيب الأداة التانية لوقت تاني": "and leave the other tool for later", "بس": "only",
+    "خطوة مهمة مرة واحدة بس": "Important one-time step", "فيه": "There are",
+    "تسليمة قديمة لسه سطورها مش متسجلة": "old submissions whose lines aren't registered yet",
+    "يعني ممكن حد يرجع يسلّم نفس السطور تاني": "so someone could submit the same lines again",
+    "اضغط الزرار وسيب الصفحة مفتوحة لحد ما يخلص": "Press the button and keep the page open until it finishes",
+    "سجّل التسليمات القديمة": "Register old submissions", "خلصنا!": "Done!", "اتسجلت": "Registered",
+    "ماتقرتش": "couldn't be read", "ممكن ملفها اتمسح": "the file may have been deleted",
+    "من دلوقتي أي سطر فيهم مش هيتقبل تاني": "From now on none of those lines will be accepted again",
+    "لقينا تسليمات قديمة فيها سطور متكررة:": "Found old submissions with duplicate lines:",
+    "لقينا تسليمات قديمة فيها سطور متكررة": "Found old submissions with duplicate lines",
+    "سطر": "lines", "السطور دي كانت اتسلّمت في تسليمة أقدم. راجعهم لو تحب": "These lines were already submitted in an older submission. Review them if you like",
+    "مالقيناش أي سطور متكررة في الشغل القديم": "No duplicate lines found in old work",
+    "ملف التكست فاضي": "The text file is empty", "الملف مافيهوش أي سطور": "The file has no lines",
+    "بنعدّ سطور الملف": "Counting file lines", "عدد السطور مش مظبوط": "Line count doesn't match",
+    "الملف فيه": "The file has", "سطر مختلف": "unique lines", "وإنت كاتب": "and you entered",
+    "عدد السطور لازم يكون بين": "Line count must be between",
+    "سطر في ملف التكست اتسلّموا قبل كده": "lines in the text file were already submitted",
+    "مينفعش تسلّم نفس الشغل مرتين": "you can't submit the same work twice",
+    "اكتب الإيميل والباسورد": "Enter your email and password",
+    "اكتب الإيميل نفسه، مش اسم المستخدم": "Enter the email itself, not the username",
+    "المتصفح ساعات بيحط اليوزر مكانه": "browsers sometimes autofill the username instead",
+    "الإيميل أو الباسورد غلط — اكتب الباسورد تاني": "Wrong email or password — type your password again",
+    "الـ Valid أكتر من السطور": "Valid is more than the lines",
+    "الـ Valid مينفعش يكون أكتر من عدد السطور": "Valid can't be more than the number of lines",
+    "أقصى عدد سطور مسموح": "Max lines allowed",
+    "الرقم في الصورة مختلف": "The number in the image is different",
+    "الـ Valid اللي في صورة الاتشيكر مش": "The Valid in the checker image isn't",
+    "برجاء التأكد من الرقم اللي كتبته وجرّب تاني": "Please check the number you entered and try again",
+    "الـ AI مقدرش يقرا الرقم من الصورة": "AI couldn't read the number from the image",
+    "الإدارة هتراجعها بنفسها": "the admin will review it manually"
+};
+
+const AR_RUN = /[؀-ۿ](?:[؀-ۿً-ٟ\s\.،؟]*[؀-ۿً-ٟ؟])?/g;
+const HAS_AR = /[؀-ۿ]/;
+const EN_MAP = new Map(Object.entries(EN).map(([k, v]) => [k.replace(/\s+/g, " ").trim(), v]));
+
+function translateRun(run) {
+    const norm = run.replace(/\s+/g, " ").trim();
+    if (EN_MAP.has(norm)) return EN_MAP.get(norm);
+    // ترجمة كلمة بكلمة بأطول جملة متاحة في القاموس
+    const words = norm.split(" ");
+    const out = [];
+    let i = 0;
+    while (i < words.length) {
+        let found = false;
+        for (let len = Math.min(10, words.length - i); len > 0; len--) {
+            const phrase = words.slice(i, i + len).join(" ");
+            if (EN_MAP.has(phrase)) { out.push(EN_MAP.get(phrase)); i += len; found = true; break; }
+        }
+        if (!found) { out.push(words[i]); i++; }
+    }
+    return out.filter(Boolean).join(" ");
+}
+
+function translateText(str) {
+    return HAS_AR.test(str) ? str.replace(AR_RUN, translateRun) : str;
+}
+
+function skipNode(el) {
+    return !el || el.closest?.("[data-noi18n], script, style, textarea");
+}
+
+function translateTree(root) {
+    if (lang !== "en" || !root) return;
+    if (root.nodeType === 3) {
+        if (!skipNode(root.parentElement) && HAS_AR.test(root.nodeValue)) {
+            const t = translateText(root.nodeValue);
+            if (t !== root.nodeValue) root.nodeValue = t;
+        }
+        return;
+    }
+    if (root.nodeType !== 1 || skipNode(root)) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let n;
+    const nodes = [];
+    while ((n = walker.nextNode())) nodes.push(n);
+    nodes.forEach(node => {
+        if (skipNode(node.parentElement) || !HAS_AR.test(node.nodeValue)) return;
+        const t = translateText(node.nodeValue);
+        if (t !== node.nodeValue) node.nodeValue = t;
+    });
+    [root, ...root.querySelectorAll("[placeholder],[title]")].forEach(el => {
+        if (skipNode(el)) return;
+        ["placeholder", "title"].forEach(a => {
+            const v = el.getAttribute?.(a);
+            if (v && HAS_AR.test(v)) el.setAttribute(a, translateText(v));
+        });
+    });
+    if (root === document.body) document.title = translateText(document.title);
+}
+
+const i18nObserver = new MutationObserver(muts => {
+    if (lang !== "en") return;
+    muts.forEach(m => {
+        if (m.type === "characterData") translateTree(m.target);
+        else m.addedNodes.forEach(translateTree);
+    });
+});
+
+function applyLang() {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "en" ? "ltr" : "rtl";
+    document.querySelectorAll(".langBtn").forEach(b => { b.textContent = lang === "en" ? "عربي" : "EN"; });
+    if (lang === "en") {
+        translateTree(document.body);
+        i18nObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+    }
+}
+
+function toggleLanguage() {
+    if (lang === "en") {
+        // الرجوع للعربي: نحمّل الصفحة من جديد (الجلسة بتفضل محفوظة)
+        safeSet("elbob_language", "ar");
+        location.reload();
+        return;
+    }
+    lang = "en";
+    safeSet("elbob_language", "en");
+    applyLang();
+    if (S.me) renderRoute(); // نعيد رسم الصفحة بالتواريخ والعملة بالإنجليزي
+}
+
+document.addEventListener("DOMContentLoaded", applyLang);
+</script>
+</body>
+</html>
