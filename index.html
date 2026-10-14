@@ -417,7 +417,12 @@ function getFileExtension(name) {
     return parts.pop().toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-/* ===================== DATES (توقيت القاهرة، اليوم يبدأ 12 بالليل) ===================== */
+/* ===================== DATES (توقيت القاهرة) ===================== */
+
+// يوم الشغل بيبدأ الساعة 6 الصبح مش 12 بالليل:
+// أي تسليمة من 12 بالليل لحد 5:59 الصبح بتتحسب على اليوم اللي قبله
+// (مثلاً تسليم الساعة 1 بالليل يوم 15 = شغل يوم 14). غيّر الرقم لو عايز ساعة تانية.
+const DAY_START_HOUR = 6;
 
 const DAY_NAMES_AR = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 const DAY_NAMES_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -434,7 +439,11 @@ function cairoParts(value) {
     return { y: g("year"), m: g("month"), d: g("day"), h: g("hour"), min: g("minute"), wd: wd[g("weekday")] ?? 0 };
 }
 
-function dayKey(value) { const p = cairoParts(value); return `${p.y}-${p.m}-${p.d}`; }
+function dayKey(value) {
+    const t = value ? new Date(value).getTime() : Date.now();
+    const p = cairoParts(t - DAY_START_HOUR * 3600e3);
+    return `${p.y}-${p.m}-${p.d}`;
+}
 function todayKey() { return dayKey(); }
 
 function addDays(key, n) {
@@ -1227,7 +1236,8 @@ async function pollTick() {
 /* ===================== DAILY SALAWAT ===================== */
 
 // بتظهر أول ما الموقع يتفتح — مرة واحدة في اليوم (بتوقيت مصر) على كل جهاز
-function salawatKey() { return "dz_salawat_day_" + todayKey(); }
+// الصلاة على النبي ﷺ وجمعة مباركة ماشيين على اليوم الحقيقي (من 12 بالليل)، مش يوم الشغل
+function salawatKey() { const p = cairoParts(); return `dz_salawat_day_${p.y}-${p.m}-${p.d}`; }
 
 function checkDailySalawat() {
     if (safeGet(salawatKey())) return;
@@ -1858,8 +1868,11 @@ async function submitWork(e, tool) {
         setLoading(btn, "بنعدّ سطور الملف...");
         const fileText = await workFile.text();
         const lineHashes = await hashLines(fileText);
-        // بنعدّ كل السطور اللي فيها كلام (من غير الفاضية) — زي ما الموظف بيشوفها في الملف
-        const lines = fileText.split(/\r?\n/).filter(l => l.trim()).length;
+        // بنعدّ السطور المختلفة بس — السطر المتكرر جوه الملف بيتحسب مرة واحدة
+        // (عشان محدش يكرر سطر ويكتب Valid أكتر)
+        const rawLines = fileText.split(/\r?\n/).filter(l => l.trim()).length;
+        const lines = lineHashes.length;
+        const dupInFile = rawLines - lines;
         if (!lines) { showSubmitError("ملف التكست فاضي", "الملف مافيهوش أي سطور"); return; }
 
         // القاعدة: الـ Valid مينفعش يكون أكتر من السطور،
@@ -1868,8 +1881,9 @@ async function submitWork(e, tool) {
         if (valid > lines) {
             registerOcrFail();
             updateLockUI();
-            showSubmitError("الـ Valid أكتر من السطور",
-                `الملف فيه ${lines} سطر\nوإنت كاتب Valid ${valid}\n\nالـ Valid مينفعش يكون أكتر من عدد السطور`);
+            showSubmitError("الـ Valid أكتر من السطور", dupInFile > 0
+                ? `الملف فيه ${rawLines} سطر، منهم ${dupInFile} سطر متكرر\nيعني ${lines} سطر مختلف بس\nوإنت كاتب Valid ${valid}\n\nشيل السطور المتكررة أو صلّح الرقم`
+                : `الملف فيه ${lines} سطر\nوإنت كاتب Valid ${valid}\n\nالـ Valid مينفعش يكون أكتر من عدد السطور`);
             return;
         }
         if (lines > valid + locked + extra) {
