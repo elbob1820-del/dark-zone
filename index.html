@@ -25,7 +25,7 @@ if (window.tailwind) tailwind.config = {
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
 * { font-family: "Cairo", sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -89,11 +89,18 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .nav-item { display:flex; align-items:center; gap:.75rem; padding:.7rem 1rem; border-radius:1rem; font-weight:800; font-size:.92rem; color: rgb(100 116 139); }
 .nav-item:hover { background: rgba(148,163,184,.12); color: inherit; }
 .nav-item.active { color:#fff; }
+.nav-group { font-size:.68rem; font-weight:900; letter-spacing:.04em; color: rgb(148 163 184); padding: 1rem 1rem .35rem; }
+.nav-group:first-child { padding-top: 0; }
+.dark .nav-group { color: rgb(100 116 139); }
+.nav-ico { width:1.75rem; height:1.75rem; display:flex; align-items:center; justify-content:center; border-radius:.6rem; font-size:1.05rem; background: rgba(148,163,184,.12); transition:.15s; }
+.nav-item.active .nav-ico { background: rgba(255,255,255,.2); }
 .nav-item .nav-badge { margin-inline-start:auto; min-width:1.4rem; padding:0 .4rem; border-radius:999px; font-size:.72rem; text-align:center; background:#f97316; color:#fff; }
 
 .bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
 .bnav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:.1rem; padding:.55rem 0 .45rem; font-size:.7rem; font-weight:800; color: rgb(100 116 139); position: relative; }
 .bnav-item .ico { font-size:1.25rem; line-height:1; }
+.more-sheet { animation: sheetUp .28s cubic-bezier(.2,.9,.3,1.1) both; }
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: none; } }
 .bnav-item.active { color: inherit; }
 .bnav-item.active::before { content:""; position:absolute; top:0; width:28px; height:3px; border-radius:0 0 4px 4px; background: var(--accent, #6366f1); }
 .bnav-item .nav-badge { position:absolute; top:4px; inset-inline-start:calc(50% + 6px); min-width:1.1rem; padding:0 .3rem; border-radius:999px; font-size:.62rem; background:#f97316; color:#fff; }
@@ -130,6 +137,25 @@ table.dz-table td { padding:.75rem .8rem; border-top:1px solid rgba(148,163,184,
 .thumb { width:64px; height:64px; border-radius:.9rem; object-fit:cover; background: rgba(148,163,184,.15); cursor: zoom-in; }
 
 .bar { transition: height .5s ease; }
+
+/* ===== 📖 القرآن ===== */
+.q-font, .q-font * { font-family: "Amiri Quran", "Amiri", serif !important; }
+.q-mushaf { font-size: var(--qsize, 30px); line-height: 2.3; }
+@media (max-width: 640px) { .q-mushaf { font-size: var(--qsize, 25px); } }
+.q-ayah { cursor: pointer; border-radius: .4rem; padding: 0 2px; transition: background .2s; }
+.q-ayah:hover { background: rgba(16,185,129,.08); }
+.q-ayah.active { background: rgba(16,185,129,.2); }
+.q-ayah.flash { background: rgba(234,179,8,.25); }
+.q-num { color: #10b981; font-size: .8em; white-space: nowrap; }
+.q-bm { display:inline-block; font-size:.55em; vertical-align: super; margin-inline-start: 2px; }
+.qr-pulse { animation: qrPulse 1.6s ease-in-out infinite; }
+@keyframes qrPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,.55); } 50% { box-shadow: 0 0 0 7px rgba(16,185,129,0); } }
+/* المشغّل الصغير */
+#qrMini { position: fixed; z-index: 35; left: .75rem; right: .75rem; bottom: calc(4.4rem + env(safe-area-inset-bottom)); }
+@media (min-width: 1024px) { #qrMini { left: 1.5rem; right: auto; bottom: 1.5rem; width: 26rem; } }
+.qr-mini-on #toastContainer { bottom: 10rem; }
+@media (min-width: 1024px) { .qr-mini-on #toastContainer { bottom: 7rem; } }
+.qr-mini-on #page { padding-bottom: 12rem; }
 </style>
 </head>
 
@@ -234,7 +260,7 @@ table.dz-table td { padding:.75rem .8rem; border-top:1px solid rgba(148,163,184,
         </div>
     </div>
 </main>
-<p class="text-center text-[11px] text-slate-400 pb-4" data-noi18n>DARK ZONE · v2.24 (224)</p>
+<p class="text-center text-[11px] text-slate-400 pb-4" data-noi18n>DARK ZONE · v2.30 (230)</p>
 </div>
 
 <!-- ================= APP SHELL ================= -->
@@ -249,7 +275,7 @@ table.dz-table td { padding:.75rem .8rem; border-top:1px solid rgba(148,163,184,
                 <p id="sideRole" class="text-xs text-slate-500 font-bold">-</p>
             </div>
         </div>
-        <nav id="sideNav" class="space-y-1.5 flex-1"></nav>
+        <nav id="sideNav" class="space-y-1 flex-1 overflow-y-auto no-scrollbar -mx-1 px-1"></nav>
         <div class="pt-4 border-t border-slate-200 dark:border-white/10">
             <div class="flex items-center gap-3 px-1 mb-3">
                 <div id="sideAvatar" class="w-10 h-10 rounded-xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-black">?</div>
@@ -292,6 +318,7 @@ table.dz-table td { padding:.75rem .8rem; border-top:1px solid rgba(148,163,184,
 </div>
 
 <div id="modalRoot"></div>
+<div id="qrMini" class="hidden-view" data-noi18n></div>
 <div id="toastContainer" class="fixed bottom-24 lg:bottom-6 left-4 z-[500] space-y-3"></div>
 
 <!-- Image viewer -->
@@ -359,7 +386,7 @@ const TOOLS = {
 };
 
 // رقم النسخة — بيزيد مع كل تحديث. الأونر يقدر يوقف أي نسخة أقدم من min_version
-const APP_VERSION = 224;
+const APP_VERSION = 230;
 
 const MAX_TXT_SIZE = 10 * 1024 * 1024;
 const MAX_IMG_SIZE = 20 * 1024 * 1024;
@@ -1155,6 +1182,7 @@ async function checkExistingSession() {
 
 async function logout(silent = false) {
     stopPolling();
+    try { qrStop(); } catch (e) {}
     await db.auth.signOut();
     Object.assign(S, { user: null, me: null, subs: [], workers: [], staff: [], loaded: false });
     thumbCache.clear();
@@ -1166,30 +1194,39 @@ async function logout(silent = false) {
 
 /* ===================== ROUTER ===================== */
 
+// group = عنوان المجموعة في السايد بار — bottom = يظهر في شريط الموبايل اللي تحت (الباقي في "☰ المزيد")
+const NAV_GROUPS = {
+    work: "💼 الشغل", account: "💰 حسابي", mine: "🤍 ليك",
+    admin: "📊 الإدارة", tools: "🛠️ الأدوات", general: "🤍 عام", review: "🧐 المراجعة"
+};
+
 const NAV = {
     worker: [
-        { name: "yazeed", label: "تسليم يزيد", short: "يزيد", icon: "🟣", accent: TOOLS.yazeed.hex },
-        { name: "tayeb", label: "تسليم الطيب", short: "الطيب", icon: "⚡", accent: TOOLS.tayeb.hex },
-        { name: "tools", label: "التولز", short: "التولز", icon: "🧰", accent: "#0ea5e9" },
-        { name: "keys", label: "مفاتيحي", short: "مفاتيحي", icon: "🔑", accent: TOOLS.yazeed.hex },
-        { name: "leaderboard", label: "الترتيب", short: "الترتيب", icon: "🏆", accent: "#f59e0b" },
-        { name: "videos", label: "الشروحات", short: "الشرح", icon: "🎥", accent: "#ef4444" },
-        { name: "money", label: "مستحقاتي وحسابي", short: "مستحقاتي", icon: "💰", accent: "#10b981" }
+        { name: "yazeed", label: "تسليم يزيد", short: "يزيد", icon: "🟣", accent: TOOLS.yazeed.hex, group: "work", bottom: true },
+        { name: "tayeb", label: "تسليم الطيب", short: "الطيب", icon: "⚡", accent: TOOLS.tayeb.hex, group: "work", bottom: true },
+        { name: "tools", label: "التولز", short: "التولز", icon: "🧰", accent: "#0ea5e9", group: "work" },
+        { name: "leaderboard", label: "الترتيب", short: "الترتيب", icon: "🏆", accent: "#f59e0b", group: "work" },
+        { name: "videos", label: "الشروحات", short: "الشرح", icon: "🎥", accent: "#ef4444", group: "mine" },
+        { name: "quran", label: "القرآن الكريم", short: "القرآن", icon: "📖", accent: "#10b981", group: "mine", bottom: true },
+        { name: "keys", label: "مفاتيحي", short: "مفاتيحي", icon: "🔑", accent: TOOLS.yazeed.hex, group: "account" },
+        { name: "money", label: "مستحقاتي وحسابي", short: "مستحقاتي", icon: "💰", accent: "#10b981", group: "account", bottom: true }
     ],
     owner: [
-        { name: "home", label: "نظرة عامة", short: "الرئيسية", icon: "🏠", accent: "#6366f1" },
-        { name: "yazeed", label: "أداة يزيد", short: "يزيد", icon: "🟣", accent: TOOLS.yazeed.hex, badge: "yazeed" },
-        { name: "tayeb", label: "أداة الطيب", short: "الطيب", icon: "⚡", accent: TOOLS.tayeb.hex, badge: "tayeb" },
-        { name: "workers", label: "الموظفين", short: "الموظفين", icon: "👥", accent: "#0ea5e9" },
-        { name: "payments", label: "المدفوعات والتقفيل", short: "المدفوعات", icon: "💰", accent: "#10b981" },
-        { name: "tools", label: "التولز", short: "التولز", icon: "🧰", accent: "#0ea5e9" },
-        { name: "keys", label: "خزنة المفاتيح", short: "المفاتيح", icon: "🔐", accent: TOOLS.yazeed.hex, badge: "keys" },
-        { name: "videos", label: "الشروحات", short: "الشرح", icon: "🎥", accent: "#ef4444" },
-        { name: "leaderboard", label: "الترتيب", short: "الترتيب", icon: "🏆", accent: "#f59e0b" }
+        { name: "home", label: "نظرة عامة", short: "الرئيسية", icon: "🏠", accent: "#6366f1", group: "admin", bottom: true },
+        { name: "workers", label: "الموظفين", short: "الموظفين", icon: "👥", accent: "#0ea5e9", group: "admin" },
+        { name: "payments", label: "المدفوعات والتقفيل", short: "المدفوعات", icon: "💰", accent: "#10b981", group: "admin", bottom: true },
+        { name: "yazeed", label: "أداة يزيد", short: "يزيد", icon: "🟣", accent: TOOLS.yazeed.hex, badge: "yazeed", group: "tools", bottom: true },
+        { name: "tayeb", label: "أداة الطيب", short: "الطيب", icon: "⚡", accent: TOOLS.tayeb.hex, badge: "tayeb", group: "tools", bottom: true },
+        { name: "tools", label: "التولز", short: "التولز", icon: "🧰", accent: "#0ea5e9", group: "tools" },
+        { name: "keys", label: "خزنة المفاتيح", short: "المفاتيح", icon: "🔐", accent: TOOLS.yazeed.hex, badge: "keys", group: "tools" },
+        { name: "leaderboard", label: "الترتيب", short: "الترتيب", icon: "🏆", accent: "#f59e0b", group: "general" },
+        { name: "videos", label: "الشروحات", short: "الشرح", icon: "🎥", accent: "#ef4444", group: "general" },
+        { name: "quran", label: "القرآن الكريم", short: "القرآن", icon: "📖", accent: "#10b981", group: "general" }
     ],
     supervisor: [
-        { name: "yazeed", label: "مراجعة يزيد", short: "يزيد", icon: "🟣", accent: TOOLS.yazeed.hex, badge: "yazeed" },
-        { name: "tayeb", label: "مراجعة الطيب", short: "الطيب", icon: "⚡", accent: TOOLS.tayeb.hex, badge: "tayeb" }
+        { name: "yazeed", label: "مراجعة يزيد", short: "يزيد", icon: "🟣", accent: TOOLS.yazeed.hex, badge: "yazeed", group: "review", bottom: true },
+        { name: "tayeb", label: "مراجعة الطيب", short: "الطيب", icon: "⚡", accent: TOOLS.tayeb.hex, badge: "tayeb", group: "review", bottom: true },
+        { name: "quran", label: "القرآن الكريم", short: "القرآن", icon: "📖", accent: "#10b981", group: "general", bottom: true }
     ]
 };
 
@@ -1222,29 +1259,51 @@ function pendingCountFor(tool) {
     return S.subs.filter(s => s.status === "pending" && toolOf(s) === tool).length;
 }
 
+function navBadgeCount(it) {
+    if (!it.badge) return 0;
+    return it.badge === "keys" ? pendingKeyReqs().length : pendingCountFor(it.badge);
+}
+
+function navIsActive(it, active) {
+    return it.name === active || (active === "worker" && it.name === "workers");
+}
+
 function renderNav(active) {
     const items = NAV[S.me.role] || [];
-    const accent = (items.find(i => i.name === active) || items[0])?.accent || "#6366f1";
-    const badge = it => {
-        if (!it.badge) return "";
-        const n = it.badge === "keys" ? pendingKeyReqs().length : pendingCountFor(it.badge);
-        return n ? `<span class="nav-badge num">${n}</span>` : "";
-    };
+    const accent = (items.find(i => navIsActive(i, active)) || items[0])?.accent || "#6366f1";
+    const badge = it => { const n = navBadgeCount(it); return n ? `<span class="nav-badge num">${n}</span>` : ""; };
 
-    $("sideNav").innerHTML = items.map(it => {
-        const isActive = it.name === active || (active === "worker" && it.name === "workers");
-        return `<a href="#/${it.name}" class="nav-item ${isActive ? "active" : ""}" style="${isActive ? `background:${it.accent}` : ""}">
-            <span class="text-lg">${it.icon}</span><span>${esc(it.label)}</span>${badge(it)}
+    // ----- السايد بار: مجموعات بعناوين -----
+    let html = "", lastGroup = null;
+    items.forEach(it => {
+        if (it.group !== lastGroup) {
+            lastGroup = it.group;
+            html += `<p class="nav-group">${esc(NAV_GROUPS[it.group] || "")}</p>`;
+        }
+        const on = navIsActive(it, active);
+        html += `<a href="#/${it.name}" class="nav-item ${on ? "active" : ""}" style="${on ? `background:${it.accent};box-shadow:0 8px 22px -8px ${it.accent}` : ""}">
+            <span class="nav-ico">${it.icon}</span><span>${esc(it.label)}</span>${badge(it)}
         </a>`;
-    }).join("");
+    });
+    $("sideNav").innerHTML = html;
+
+    // ----- شريط الموبايل: الأساسي + "☰ المزيد" -----
+    const main = items.length <= 5 ? items : items.filter(i => i.bottom);
+    const rest = items.filter(i => !main.includes(i));
+    const restActive = rest.some(i => navIsActive(i, active));
+    const restBadge = rest.reduce((a, i) => a + navBadgeCount(i), 0);
 
     $("bottomNav").style.setProperty("--accent", accent);
-    $("bottomNav").innerHTML = items.map(it => {
-        const isActive = it.name === active || (active === "worker" && it.name === "workers");
-        return `<a href="#/${it.name}" class="bnav-item ${isActive ? "active" : ""}">
+    $("bottomNav").innerHTML = main.map(it => `
+        <a href="#/${it.name}" class="bnav-item ${navIsActive(it, active) ? "active" : ""}">
             <span class="ico">${it.icon}</span><span>${esc(it.short)}</span>${badge(it)}
-        </a>`;
-    }).join("");
+        </a>`).join("") + (rest.length ? `
+        <button type="button" onclick="openMoreNav()" class="bnav-item ${restActive ? "active" : ""}">
+            <span class="ico">☰</span><span>المزيد</span>${restBadge ? `<span class="nav-badge num">${restBadge}</span>` : ""}
+        </button>` : "");
+
+    // لو "المزيد" مفتوح نحدّثه
+    if ($("moreNavSheet")) fillMoreNav(active);
 
     // عدّاد التسليمات المعلقة على اسم التاب
     if (S.me.role !== "worker") {
@@ -1252,6 +1311,52 @@ function renderNav(active) {
         document.title = n ? `(${n}) DARK ZONE` : "DARK ZONE";
     }
 }
+
+/* ---------- ☰ المزيد (الموبايل) ---------- */
+
+function fillMoreNav(active) {
+    const box = $("moreNavBody");
+    if (!box) return;
+    const items = NAV[S.me.role] || [];
+    const groups = [];
+    items.forEach(it => {
+        let g = groups.find(x => x.key === it.group);
+        if (!g) groups.push(g = { key: it.group, items: [] });
+        g.items.push(it);
+    });
+    box.innerHTML = groups.map(g => `
+        <p class="text-xs font-black text-slate-400 mb-2 mt-4 first:mt-0">${esc(NAV_GROUPS[g.key] || "")}</p>
+        <div class="grid grid-cols-3 gap-2">${g.items.map(it => {
+            const on = navIsActive(it, active);
+            const n = navBadgeCount(it);
+            return `<a href="#/${it.name}" onclick="closeMoreNav()" class="relative rounded-2xl p-3 flex flex-col items-center gap-1.5 text-center font-black text-xs transition ${on ? "text-white" : "bg-slate-100 dark:bg-white/5 active:scale-95"}" style="${on ? `background:${it.accent}` : ""}">
+                <span class="text-2xl leading-none">${it.icon}</span><span class="leading-4">${esc(it.short)}</span>
+                ${n ? `<span class="absolute top-1.5 left-1.5 min-w-[1.2rem] px-1 rounded-full bg-orange-500 text-white text-[10px] num">${n}</span>` : ""}
+            </a>`;
+        }).join("")}</div>`).join("");
+}
+
+function openMoreNav() {
+    if ($("moreNavSheet")) return closeMoreNav();
+    const el = document.createElement("div");
+    el.id = "moreNavSheet";
+    el.className = "lg:hidden fixed inset-0 z-[150] modal-bg flex items-end";
+    el.innerHTML = `
+        <div class="more-sheet w-full rounded-t-[2rem] bg-white dark:bg-[#0f1520] border-t border-slate-200 dark:border-white/10 p-5 pb-24 max-h-[80vh] overflow-y-auto">
+            <div class="w-12 h-1.5 rounded-full bg-slate-300 dark:bg-white/15 mx-auto mb-4"></div>
+            <div class="flex items-center justify-between mb-3">
+                <p class="font-black text-lg">كل الصفحات</p>
+                <button type="button" onclick="closeMoreNav()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-white/10 font-black" aria-label="قفل">✕</button>
+            </div>
+            <div id="moreNavBody"></div>
+        </div>`;
+    el.addEventListener("click", e => { if (e.target === el) closeMoreNav(); });
+    document.body.appendChild(el);
+    fillMoreNav(parseRoute().name);
+}
+
+function closeMoreNav() { $("moreNavSheet")?.remove(); }
+window.addEventListener("hashchange", closeMoreNav);
 
 function renderRoute() {
     if (!S.me) return;
@@ -5044,6 +5149,747 @@ PAGES.worker.leaderboard = LB_PAGE;
 PAGES.owner.leaderboard = LB_PAGE;
 
 /* =========================================================
+   📖 القرآن الكريم — قراءة + تلاوة آية بآية + التفسير الميسر
+   النص والتفسير من api.alquran.cloud — الصوت من cdn.islamic.network
+   آخر قراءة / المحفوظات / القارئ / حجم الخط: محفوظين على جهاز كل واحد بس
+   - التلاوة بتكمل في كل صفحات الداش بورد (المشغّل الصغير تحت)
+   - QR.cur = السورة اللي مفتوحة قدامك — QR.pl = السورة اللي بتتقري
+   الصفحة كلها data-noi18n عشان وضع EN مايلمسش نص القرآن
+========================================================= */
+
+const QR_API = "https://api.alquran.cloud/v1";
+const QR_AUDIO = "https://cdn.islamic.network/quran/audio";
+// [مفتاح القارئ, الاسم, جودة ملفات الآيات, رقمه في Quran.com]
+const QR_RECITERS = [
+    ["ar.alafasy", "مشاري العفاسي", 128, 7],
+    ["ar.husary", "محمود خليل الحصري", 128, 6],
+    ["ar.minshawi", "محمد صديق المنشاوي", 128, 9],
+    ["ar.abdulbasitmurattal", "عبد الباسط عبد الصمد", 192, 2]
+];
+// التلاوة المتصلة: السورة كلها ملف واحد + توقيت كل آية (من غير أي قطع بين الآيات)
+const QR_TIMING_API = "https://api.quran.com/api/v4/chapter_recitations";
+
+function qrGet(k, d) { try { const v = safeGet("dzq_" + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function qrSet(k, v) { safeSet("dzq_" + k, JSON.stringify(v)); }
+const qrAr = n => String(n).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
+const qrNorm = s => String(s || "")
+    .replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ]/g, "")
+    .replace(/[ٱأإآ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").trim();
+const qrName = n => String(n || "").replace(/^سُورَةُ\s+/, "");
+const qrType = t => t === "Meccan" ? "مكية" : "مدنية";
+const qrReciterName = () => (QR_RECITERS.find(r => r[0] === QR.reciter) || QR_RECITERS[0])[1];
+
+const QR = {
+    surahs: [], cur: null, pl: null, playIdx: -1, token: 0,
+    repeat: qrGet("repeat", false),
+    reciter: qrGet("reciter", "ar.alafasy"),
+    fs: qrGet("fs", null),
+    // مشغّلين بالتبادل: واحد شغّال، والتاني محمّل الآية اللي بعدها وجاهز —
+    // كده مفيش سكوت بين الآيات (قبل كده كانت الآية الجاية بتتحمّل بعد ما اللي قبلها تخلص)
+    audios: [new Audio(), new Audio()]
+};
+QR.audios.forEach(a => { a.preload = "auto"; a.dataset.src = ""; });
+QR.audio = QR.audios[0];
+const qrSpare = () => (QR.audio === QR.audios[0] ? QR.audios[1] : QR.audios[0]);
+
+async function qrJSON(url) {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    if (j.code !== 200) throw new Error(j.status);
+    return j.data;
+}
+
+async function qrLoadSurahs() {
+    if (QR.surahs.length === 114) return;
+    const cached = qrGet("surahs", null);
+    if (Array.isArray(cached) && cached.length === 114) { QR.surahs = cached; return; }
+    QR.surahs = await qrJSON(`${QR_API}/surah`);
+    qrSet("surahs", QR.surahs);
+}
+
+const qrBox = () => $("qrRoot");
+const qrSamePlaying = () => !!(QR.pl && QR.cur && QR.pl.num === QR.cur.num);
+
+/* ---------- حجم الخط ---------- */
+
+function qrApplyFont() {
+    if (QR.fs) document.documentElement.style.setProperty("--qsize", QR.fs + "px");
+}
+function qrFont(d) {
+    const curSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--qsize")) ||
+        (window.innerWidth < 640 ? 25 : 30);
+    QR.fs = Math.min(48, Math.max(18, curSize + d));
+    qrSet("fs", QR.fs);
+    qrApplyFont();
+    toast(`حجم الخط: ${QR.fs}`, "info");
+}
+
+/* ---------- قطع مشتركة ---------- */
+
+function qrLoadingHtml(msg) {
+    return `<div class="py-16 text-center text-slate-500 font-bold"><span class="loader text-emerald-500"></span><p class="mt-3">${esc(msg)}</p></div>`;
+}
+function qrErrorHtml(msg) {
+    return `<div class="card p-8 text-center">
+        <div class="text-4xl mb-2">⚠️</div><p class="font-black">${esc(msg)}</p>
+        <button type="button" onclick="renderRoute()" class="mt-4 px-5 py-2.5 rounded-2xl bg-emerald-600 text-white font-black">جرّب تاني</button>
+    </div>`;
+}
+
+function qrToolbar({ back = true, bmActive = false } = {}) {
+    const n = qrBookmarks().length;
+    return `
+    <div id="qrBar" class="flex flex-wrap items-center gap-2 mb-4">
+        ${back ? `<a href="#/quran" class="h-10 px-4 rounded-xl bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 font-black text-sm inline-flex items-center gap-1.5">→ <span>الفهرس</span></a>` : ""}
+        <div class="flex-1"></div>
+        <div class="h-10 inline-flex items-center rounded-xl bg-slate-200 dark:bg-white/10 overflow-hidden" title="حجم خط الآيات">
+            <span class="px-3 text-xs font-black text-slate-500 hidden sm:inline">حجم الخط</span>
+            <button type="button" onclick="qrFont(-2)" class="w-10 h-10 font-black hover:bg-slate-300 dark:hover:bg-white/15" title="تصغير الخط" aria-label="تصغير الخط">−</button>
+            <span class="w-px h-5 bg-slate-300 dark:bg-white/15"></span>
+            <button type="button" onclick="qrFont(2)" class="w-10 h-10 font-black hover:bg-slate-300 dark:hover:bg-white/15" title="تكبير الخط" aria-label="تكبير الخط">+</button>
+        </div>
+        <a href="#/quran/bm" class="h-10 px-4 rounded-xl font-black text-sm inline-flex items-center gap-1.5 ${bmActive ? "bg-emerald-600 text-white" : "bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15"}">
+            🔖 <span>المحفوظات</span>${n ? `<span class="px-1.5 rounded-md ${bmActive ? "bg-white/25" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"} text-xs">${qrAr(n)}</span>` : ""}
+        </a>
+    </div>`;
+}
+
+/* ---------- الصفحة ---------- */
+
+function renderQuran() {
+    return `<div id="qrRoot" data-noi18n>${qrLoadingHtml("جاري التحميل...")}</div>`;
+}
+
+function qrAfter(root, param) {
+    qrApplyFont();
+    const p = String(param || "");
+    const m = p.match(/^(\d{1,3})(?:-(\d{1,3}))?$/);
+    if (p === "bm") qrShowBookmarks();
+    else if (m) qrOpenSurah(+m[1], m[2] ? +m[2] : null);
+    else qrShowHome();
+}
+
+/* ---------- الفهرس ---------- */
+
+async function qrShowHome() {
+    const tok = ++QR.token;
+    try { await qrLoadSurahs(); }
+    catch (e) {
+        if (tok === QR.token && qrBox()) qrBox().innerHTML = qrErrorHtml("مش قادر يوصل لسيرفر القرآن، اتأكد من النت");
+        return;
+    }
+    if (tok !== QR.token || !qrBox()) return;
+
+    const last = qrGet("last", null);
+    const bmCount = qrBookmarks().length;
+    qrBox().innerHTML = `
+    <div class="rounded-3xl p-6 md:p-8 mb-6 text-white bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 shadow-xl relative overflow-hidden">
+        <div class="absolute -left-4 -top-6 text-[120px] opacity-15 leading-none select-none">📖</div>
+        <p class="text-white/80 font-bold">DARK ZONE</p>
+        <h1 class="text-3xl md:text-4xl font-black mt-1">القرآن الكريم</h1>
+        <p class="text-white/85 text-sm mt-2">اقرأ واسمع وتدبّر — والتلاوة بتفضل شغالة وإنت بتسلّم شغلك 🤍</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+            ${last ? `<a href="#/quran/${Number(last.s)}-${Number(last.a)}" class="px-4 py-2.5 rounded-2xl bg-white text-slate-900 font-black text-sm hover:scale-[1.03] transition">📍 كمّل: سورة ${esc(last.name)} - آية ${qrAr(last.a)}</a>` : ""}
+            <a href="#/quran/bm" class="px-4 py-2.5 rounded-2xl bg-white/15 hover:bg-white/25 font-black text-sm transition">🔖 المحفوظات (${qrAr(bmCount)})</a>
+        </div>
+    </div>
+
+    <div class="flex gap-2 mb-4">
+        <input id="qrQ" class="input" placeholder="🔍 اسم السورة أو رقمها، أو كلمة من آية..." autocomplete="off">
+        <button type="button" id="qrQBtn" class="shrink-0 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm">بحث في الآيات</button>
+    </div>
+    <div id="qrResults"></div>
+    <div id="qrGrid" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3"></div>`;
+
+    qrGrid("");
+    $("qrQ").addEventListener("input", e => { $("qrResults").innerHTML = ""; qrGrid(e.target.value); });
+    $("qrQ").addEventListener("keydown", e => { if (e.key === "Enter") qrSearch($("qrQ").value); });
+    $("qrQBtn").onclick = () => qrSearch($("qrQ").value);
+    qrUpdateMini();
+}
+
+function qrGrid(q) {
+    const box = $("qrGrid");
+    if (!box) return;
+    const nq = qrNorm(q).replace(/^سوره\s*/, "");
+    const playing = QR.pl && QR.playIdx >= 0 ? QR.pl.num : 0;
+    const list = QR.surahs.filter(s => !nq ||
+        qrNorm(qrName(s.name)).includes(nq) ||
+        String(s.englishName || "").toLowerCase().includes(nq.toLowerCase()) ||
+        String(s.number) === nq);
+    box.innerHTML = list.map(s => `
+        <a href="#/quran/${s.number}" class="card p-3.5 flex items-center gap-3 hover:-translate-y-0.5 transition ${playing === s.number ? "ring-2 ring-emerald-500" : ""}">
+            <div class="w-11 h-11 shrink-0 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black">${playing === s.number ? "🔊" : qrAr(s.number)}</div>
+            <div class="flex-1 min-w-0">
+                <p class="q-font text-xl leading-[2] truncate">${esc(qrName(s.name))}</p>
+                <p class="text-[11px] text-slate-500">${qrType(s.revelationType)} • ${qrAr(s.numberOfAyahs)} آية</p>
+            </div>
+            <span class="text-[11px] text-slate-400 ltr shrink-0">${esc(s.englishName)}</span>
+        </a>`).join("") || `<div class="sm:col-span-2 xl:col-span-3">${emptyBox("مفيش سورة بالاسم ده", "🔍")}</div>`;
+}
+
+async function qrSearch(q) {
+    const nq = qrNorm(q);
+    if (nq.length < 2) return toast("اكتب كلمة أطول", "warning");
+    const box = $("qrResults");
+    if (!box) return;
+    box.innerHTML = qrLoadingHtml("جاري البحث...");
+    try {
+        const d = await qrJSON(`${QR_API}/search/${encodeURIComponent(nq)}/all/quran-simple-clean`);
+        const m = (d.matches || []).slice(0, 50);
+        if (!$("qrResults")) return;
+        box.innerHTML = `
+        <p class="text-sm font-black text-slate-500 mb-3">نتائج البحث (${qrAr(d.count)})${d.count > 50 ? " — أول ٥٠" : ""}</p>
+        <div class="space-y-2 mb-6">${m.map(x => `
+            <a href="#/quran/${x.surah.number}-${x.numberInSurah}" class="card p-4 block hover:-translate-y-0.5 transition">
+                <p class="q-font text-xl leading-[2]">${esc(x.text)}</p>
+                <p class="text-xs font-black text-emerald-600 dark:text-emerald-400 mt-1">سورة ${esc(qrName(x.surah.name))} - آية ${qrAr(x.numberInSurah)}</p>
+            </a>`).join("")}</div>
+        <p class="text-sm font-black text-slate-500 mb-3">كل السور</p>`;
+    } catch (e) {
+        if ($("qrResults")) box.innerHTML = `<div class="mb-6">${emptyBox("مفيش نتائج للكلمة دي", "🔍")}</div>`;
+    }
+}
+
+/* ---------- السورة ---------- */
+
+async function qrOpenSurah(num, ayahNum) {
+    const tok = ++QR.token;
+    if (num < 1 || num > 114) { go("quran"); return; }
+
+    if (!QR.cur || QR.cur.num !== num) {
+        // لو السورة دي هي اللي بتتقري، مانحمّلهاش تاني
+        if (QR.pl && QR.pl.num === num) QR.cur = QR.pl;
+        else {
+            try {
+                await qrLoadSurahs();
+                const [q, t] = await qrJSON(`${QR_API}/surah/${num}/editions/quran-uthmani,ar.muyassar`);
+                if (tok !== QR.token) return;
+                QR.cur = {
+                    num,
+                    name: qrName(q.name),
+                    type: q.revelationType,
+                    ayahs: q.ayahs.map((a, i) => {
+                        let text = String(a.text || "").replace(/^﻿/, "");
+                        // البسملة بتيجي جوه أول آية — بنشيلها ونعرضها لوحدها فوق
+                        if (i === 0 && num !== 1 && num !== 9) {
+                            const w = text.split(" ");
+                            if (qrNorm(w[0]).startsWith("بسم")) text = w.slice(4).join(" ");
+                        }
+                        return { g: a.number, n: a.numberInSurah, text, tafsir: t?.ayahs?.[i]?.text || "" };
+                    })
+                };
+            } catch (e) {
+                if (tok === QR.token && qrBox()) qrBox().innerHTML = qrErrorHtml("حصلت مشكلة في تحميل السورة، اتأكد من النت");
+                return;
+            }
+        }
+    }
+    if (tok !== QR.token || !qrBox()) return;
+    qrRenderSurah();
+
+    if (ayahNum) {
+        const el = $("qa" + ayahNum);
+        if (el) {
+            setTimeout(() => el.scrollIntoView({ block: "center" }), 60);
+            el.classList.add("flash");
+            setTimeout(() => el.classList.remove("flash"), 2200);
+        }
+    }
+}
+
+function qrAyahHtml(a, i) {
+    const bm = qrIsBm(QR.cur.num, a.n);
+    return `<span class="q-ayah" id="qa${a.n}" data-i="${i}">${esc(a.text)} <span class="q-num">﴿${qrAr(a.n)}﴾</span>${bm ? `<span class="q-bm" title="محفوظة">🔖</span>` : ""}</span> `;
+}
+
+function qrRenderSurah() {
+    const c = QR.cur, n = c.num;
+    const prev = n > 1 ? QR.surahs[n - 2] : null;
+    const next = n < 114 ? QR.surahs[n] : null;
+    const seenHint = qrGet("hint_seen", false);
+    qrBox().innerHTML = `
+    ${qrToolbar()}
+    <div class="card p-5 text-center mb-4">
+        <p class="q-font text-3xl md:text-4xl text-emerald-600 dark:text-emerald-400 leading-[2]">سورة ${esc(c.name)}</p>
+        <p class="text-xs text-slate-500 font-bold">${qrType(c.type)} • ${qrAr(c.ayahs.length)} آية • السورة رقم ${qrAr(n)}</p>
+    </div>
+    <div id="qrHint" class="mb-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 flex items-center gap-3 text-sm ${seenHint ? "hidden-view" : ""}">
+        <span class="text-2xl">👆</span>
+        <p class="flex-1 font-bold leading-6">دوس على أي آية عشان <b class="text-emerald-600 dark:text-emerald-400">تسمعها</b> أو <b class="text-emerald-600 dark:text-emerald-400">تحفظها 🔖</b> أو تشوف <b class="text-emerald-600 dark:text-emerald-400">تفسيرها</b></p>
+        <button type="button" onclick="qrHideHint()" class="shrink-0 w-8 h-8 rounded-lg hover:bg-emerald-500/15 font-black" title="فهمت">✕</button>
+    </div>
+    ${n !== 1 && n !== 9 ? `<p class="q-font q-mushaf text-center mb-3">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>` : ""}
+    <div id="qrMushaf" class="card q-font q-mushaf p-5 md:p-7 text-justify">${c.ayahs.map(qrAyahHtml).join("")}</div>
+    <div class="flex justify-between gap-3 mt-4">
+        ${prev ? `<a href="#/quran/${n - 1}" class="px-4 py-2.5 rounded-2xl bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 font-black text-sm">→ سورة ${esc(qrName(prev.name))}</a>` : "<span></span>"}
+        ${next ? `<a href="#/quran/${n + 1}" class="px-4 py-2.5 rounded-2xl bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 font-black text-sm">سورة ${esc(qrName(next.name))} ←</a>` : "<span></span>"}
+    </div>
+    ${qrPlayerHtml()}`;
+
+    $("qrMushaf").addEventListener("click", e => {
+        const el = e.target.closest(".q-ayah");
+        if (el) qrOpenAyah(+el.dataset.i);
+    });
+    qrSyncPlayer();
+    qrHighlight(false);
+    qrUpdateMini();
+}
+
+function qrHideHint() {
+    qrSet("hint_seen", true);
+    $("qrHint")?.classList.add("hidden-view");
+}
+
+function qrPlayerHtml() {
+    const btn = "w-10 h-10 shrink-0 rounded-xl bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 font-black";
+    return `
+    <div class="sticky bottom-24 lg:bottom-4 z-20 mt-5">
+        <div class="rounded-3xl border border-emerald-500/30 bg-white/95 dark:bg-[#0b111c]/95 glass shadow-2xl overflow-hidden">
+            <div class="h-1 bg-emerald-500/15"><div id="qrProg" class="h-full bg-emerald-500 transition-[width] duration-300" style="width:0%"></div></div>
+            <div class="p-3 flex flex-wrap items-center gap-2">
+                <button type="button" onclick="qrStep(-1)" class="${btn}" title="الآية اللي قبلها" aria-label="الآية اللي قبلها">→</button>
+                <button type="button" id="qrPlay" onclick="qrToggle()" class="w-12 h-12 shrink-0 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-lg shadow-lg shadow-emerald-600/30" aria-label="تشغيل">▶</button>
+                <button type="button" onclick="qrStep(1)" class="${btn}" title="الآية اللي بعدها" aria-label="الآية اللي بعدها">←</button>
+                <div id="qrLabel" class="order-first w-full sm:order-none sm:w-auto sm:flex-1 min-w-0 text-xs text-slate-500 px-1 sm:px-0"></div>
+                <button type="button" id="qrBmBtn" onclick="qrBmCurrent()" class="${btn}" title="احفظ الآية اللي بتتقري" aria-label="احفظ الآية">🔖</button>
+                <button type="button" id="qrRepeat" onclick="qrToggleRepeat()" class="${btn}" title="تكرار الآية" aria-label="تكرار الآية">🔁</button>
+                <select id="qrReciter" onchange="qrSetReciter(this.value)" class="input flex-1 min-w-0 sm:flex-none sm:!w-auto sm:max-w-[170px] !py-2 text-xs" title="القارئ">
+                    ${QR_RECITERS.map(r => `<option value="${r[0]}">${r[1]}</option>`).join("")}
+                </select>
+            </div>
+        </div>
+    </div>`;
+}
+
+/* ---------- الآية (التفسير + الأزرار) ---------- */
+
+function qrBookmarks() { return qrGet("bookmarks", []); }
+function qrIsBm(s, a) { return qrBookmarks().some(b => b.s === s && b.a === a); }
+function qrSaveLast(sur, n) { if (sur) qrSet("last", { s: sur.num, a: n, name: sur.name }); }
+
+function qrOpenAyah(i) {
+    const c = QR.cur, a = c?.ayahs[i];
+    if (!a) return;
+    qrSaveLast(c, a.n);
+    qrHideHint();
+    const bm = qrIsBm(c.num, a.n);
+    const isPlaying = qrSamePlaying() && QR.playIdx === i && !QR.audio.paused;
+    const actBtn = "rounded-2xl bg-slate-100 dark:bg-white/10 hover:bg-emerald-500/15 py-3 font-black text-sm flex flex-col items-center gap-1 transition";
+    const m = openModalHtml(`
+        <div data-noi18n>
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <p class="text-sm font-black text-emerald-600 dark:text-emerald-400">سورة ${esc(c.name)} - آية ${qrAr(a.n)}</p>
+                <button type="button" data-act="close" class="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 font-black" aria-label="قفل">✕</button>
+            </div>
+            <p class="q-font text-2xl leading-[2.1] mb-4">${esc(a.text)}</p>
+            ${a.tafsir ? `<div class="rounded-2xl bg-slate-100 dark:bg-black/25 p-4 text-sm leading-7 mb-4">
+                <b class="block text-xs text-emerald-600 dark:text-emerald-400 mb-1">📘 التفسير الميسر</b>${esc(a.tafsir)}</div>` : ""}
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button type="button" data-act="play" class="${actBtn}"><span class="text-lg">${isPlaying ? "⏸" : "▶"}</span>${isPlaying ? "إيقاف" : "استماع"}</button>
+                <button type="button" data-act="bm" class="${bm ? "rounded-2xl bg-emerald-600 text-white py-3 font-black text-sm flex flex-col items-center gap-1" : actBtn}"><span class="text-lg">🔖</span>${bm ? "محفوظة ✓" : "احفظها"}</button>
+                <button type="button" data-act="copy" class="${actBtn}"><span class="text-lg">📋</span>نسخ</button>
+                <button type="button" data-act="link" class="${actBtn}"><span class="text-lg">🔗</span>رابط</button>
+            </div>
+        </div>`, { width: "max-w-xl" });
+
+    m.addEventListener("click", e => {
+        const act = e.target.closest("[data-act]")?.dataset.act;
+        if (!act) return;
+        closeTopModal(true);
+        if (act === "play") { isPlaying ? QR.audio.pause() : qrPlayIn(c, i); }
+        if (act === "bm") qrToggleBm(c, a);
+        if (act === "copy") copyText(`${a.text} ﴿${c.name}: ${qrAr(a.n)}﴾`, "اتنسخت الآية 📋");
+        if (act === "link") copyText(location.href.split("#")[0] + `#/quran/${c.num}-${a.n}`, "اتنسخ رابط الآية 🔗");
+    });
+}
+
+function qrMarkBm(sur, n, on) {
+    if (!QR.cur || QR.cur.num !== sur.num) return;
+    const el = $("qa" + n);
+    if (!el) return;
+    el.querySelector(".q-bm")?.remove();
+    if (on) el.insertAdjacentHTML("beforeend", `<span class="q-bm pop" title="محفوظة">🔖</span>`);
+}
+
+function qrToggleBm(sur, a) {
+    let bms = qrBookmarks();
+    const on = !qrIsBm(sur.num, a.n);
+    if (on) {
+        bms.unshift({ s: sur.num, a: a.n, name: sur.name, text: a.text });
+        toast("🔖 اتحفظت — تلاقيها في المحفوظات", "success");
+    } else {
+        bms = bms.filter(b => !(b.s === sur.num && b.a === a.n));
+        toast("اتشالت من المحفوظات", "info");
+    }
+    qrSet("bookmarks", bms.slice(0, 300));
+    qrMarkBm(sur, a.n, on);
+    qrRefreshBmCounts();
+    qrSyncPlayer();
+}
+
+// نحدّث عدد المحفوظات في الشريط من غير ما نعيد رسم الصفحة
+function qrRefreshBmCounts() {
+    const bar = $("qrBar");
+    if (bar) bar.outerHTML = qrToolbar({ bmActive: parseRoute().param === "bm" });
+}
+
+function qrBmCurrent() {
+    if (!QR.pl || QR.playIdx < 0) return toast("👆 شغّل آية الأول، أو دوس على الآية واختار احفظها", "warning");
+    qrToggleBm(QR.pl, QR.pl.ayahs[QR.playIdx]);
+}
+
+function qrRemoveBm(s, a) {
+    qrSet("bookmarks", qrBookmarks().filter(b => !(b.s === s && b.a === a)));
+    toast("اتشالت من المحفوظات", "info");
+    qrShowBookmarks();
+}
+
+function qrShowBookmarks() {
+    ++QR.token;
+    if (!qrBox()) return;
+    const bms = qrBookmarks();
+    qrBox().innerHTML = `
+    ${qrToolbar({ bmActive: true })}
+    <div class="rounded-3xl p-5 md:p-6 mb-5 bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-xl">
+        <h2 class="text-2xl font-black">🔖 الآيات المحفوظة <span class="text-white/80">(${qrAr(bms.length)})</span></h2>
+        <p class="text-white/85 text-sm mt-1">دوس على أي آية ترجعلها في مكانها في السورة</p>
+    </div>
+    ${bms.length ? `<div class="space-y-2">${bms.map(b => `
+        <div class="card p-4 flex items-start gap-3">
+            <a href="#/quran/${Number(b.s)}-${Number(b.a)}" class="flex-1 min-w-0">
+                <p class="q-font text-xl leading-[2]">${esc(b.text)}</p>
+                <p class="text-xs font-black text-emerald-600 dark:text-emerald-400 mt-1">سورة ${esc(b.name)} - آية ${qrAr(b.a)}</p>
+            </a>
+            <button type="button" onclick="qrRemoveBm(${Number(b.s)}, ${Number(b.a)})" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-xs font-black" title="شيلها من المحفوظات">🗑️ شيل</button>
+        </div>`).join("")}</div>`
+        : `<div class="card p-8 text-center">
+            <div class="text-5xl mb-3">🔖</div>
+            <h3 class="text-lg font-black">لسه مفيش آيات محفوظة</h3>
+            <p class="text-sm text-slate-500 mt-2 leading-7">افتح أي سورة ← دوس على الآية ← اختار <b>"🔖 احفظها"</b><br>أو وإنت بتسمع، دوس 🔖 في المشغّل يحفظ الآية اللي بتتقري</p>
+            <a href="#/quran" class="inline-block mt-5 px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black">📖 افتح الفهرس</a>
+        </div>`}`;
+    qrUpdateMini();
+}
+
+/* ---------- الصوت ----------
+   الطريقة الأساسية (surah): ملف السورة كله متصل زي ما الشيخ قراها، ومعاه توقيت كل آية بالملّي ثانية
+     → بنعرف الآية اللي بتتقري من وقت الصوت، والتنقّل بين الآيات = نقلة في نفس الملف.
+   الطريقة الاحتياطية (ayah): لو خدمة التوقيت مارديتش، بنشغّل كل آية ملف لوحده بمشغّلين بالتبادل.
+---------------------------------------------------- */
+
+function qrRec() { return QR_RECITERS.find(x => x[0] === QR.reciter) || QR_RECITERS[0]; }
+
+function qrAudioUrl(g) {
+    const r = qrRec();
+    return `${QR_AUDIO}/${r[2]}/${r[0]}/${g}.mp3`;
+}
+
+QR.timings = {};     // "رقم القارئ:رقم السورة" → { url, ts: [{from, to}] } أو null لو فشلت
+QR.mode = "surah";
+QR.playTok = 0;
+
+async function qrTimings(sur) {
+    const rid = qrRec()[3];
+    const key = rid + ":" + sur.num;
+    if (key in QR.timings) return QR.timings[key];
+    try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 8000);
+        // لازم segments=true — من غيرها الخدمة بترجّع الملف من غير توقيت الآيات
+        const r = await fetch(`${QR_TIMING_API}/${rid}/${sur.num}?segments=true`, { signal: ctrl.signal });
+        clearTimeout(timer);
+        if (!r.ok) throw new Error(r.status);
+        const f = (await r.json())?.audio_file;
+        const url = safeUrl(f?.audio_url);
+        const byKey = new Map((f?.timestamps || []).map(t => [t.verse_key, t]));
+        const ts = sur.ayahs.map(a => {
+            const t = byKey.get(`${sur.num}:${a.n}`);
+            return t ? { from: Number(t.timestamp_from) || 0, to: Number(t.timestamp_to) || 0 } : null;
+        });
+        if (!url || ts.some(t => !t || t.to <= t.from)) throw new Error("timings incomplete");
+        QR.timings[key] = { url, ts };
+    } catch (e) {
+        console.warn("Quran timings → ayah mode", e);
+        QR.timings[key] = null;
+    }
+    return QR.timings[key];
+}
+
+function qrHighlight(scroll = true) {
+    document.querySelectorAll(".q-ayah.active").forEach(e => e.classList.remove("active"));
+    if (!qrSamePlaying() || QR.playIdx < 0) return;
+    const el = $("qa" + QR.pl.ayahs[QR.playIdx].n);
+    if (!el) return;
+    el.classList.add("active");
+    if (scroll) el.scrollIntoView({ block: "center", behavior: "smooth" });
+}
+
+// كل ما الآية اللي بتتقري تتغيّر
+function qrOnAyahChange(scroll = true) {
+    const a = QR.pl?.ayahs[QR.playIdx];
+    if (!a) return;
+    qrHighlight(scroll);
+    qrSaveLast(QR.pl, a.n);
+    qrSyncPlayer();
+    qrUpdateMini();
+    qrMediaSession();
+}
+
+// النقلة لوقت معيّن — ولحد ما تتم، qrTick مايحسبش الآية (عشان مايرجعش للآية القديمة لحظة)
+function qrSeek(A, sec) {
+    QR.seekPending = true;
+    const go = () => { try { A.currentTime = sec; } catch (e) {} QR.seekPending = false; };
+    if (A.readyState >= 1) go();
+    else A.addEventListener("loadedmetadata", go, { once: true });
+}
+
+async function qrPlayIn(sur, i) {
+    if (!sur || i < 0 || i >= sur.ayahs.length) return;
+    const tok = ++QR.playTok;
+    QR.pl = sur;
+    QR.playIdx = i;
+    qrOnAyahChange();
+
+    const tm = await qrTimings(sur);
+    if (tok !== QR.playTok || QR.pl !== sur) return;   // اتدست حاجة تانية في النص
+
+    if (tm) {
+        // ===== التلاوة المتصلة =====
+        QR.mode = "surah";
+        const A = QR.audios[0];
+        if (QR.audio !== A) { QR.audio.pause(); QR.audio = A; }
+        QR.audios[1].pause();
+        if (A.dataset.src !== tm.url) { A.dataset.src = tm.url; A.src = tm.url; }
+        // أول آية بنبدأ من أول الملف (عشان الاستعاذة/البسملة)
+        qrSeek(A, i === 0 ? 0 : tm.ts[i].from / 1000);
+        A.play().catch(() => {});
+        return;
+    }
+
+    // ===== احتياطي: كل آية ملف لوحده =====
+    QR.mode = "ayah";
+    const url = qrAudioUrl(sur.ayahs[i].g);
+    const spare = qrSpare();
+    if (QR.audio.dataset.src === url) {
+        QR.audio.currentTime = 0;
+    } else if (spare.dataset.src === url) {
+        QR.audio.pause();
+        QR.audio = spare;
+        QR.audio.currentTime = 0;
+    } else {
+        QR.audio.dataset.src = url;
+        QR.audio.src = url;
+    }
+    QR.audio.play().catch(() => {});
+    const nx = QR.repeat ? null : sur.ayahs[i + 1];
+    const sp = qrSpare();
+    if (nx) {
+        const u = qrAudioUrl(nx.g);
+        if (sp.dataset.src !== u) { sp.pause(); sp.dataset.src = u; sp.src = u; sp.load(); }
+    }
+}
+
+// التلاوة المتصلة: نعرف الآية من وقت الصوت (بيتنادى من timeupdate وكمان كل فريم وإحنا شغالين)
+function qrTick() {
+    if (QR.mode !== "surah" || !QR.pl || QR.playIdx < 0) return;
+    const tm = QR.timings[qrRec()[3] + ":" + QR.pl.num];
+    if (!tm || QR.seekPending || QR.audio.seeking || QR.audio.readyState < 1) return;
+    const ms = QR.audio.currentTime * 1000;
+    const cur = tm.ts[QR.playIdx];
+
+    // 🔁 تكرار الآية: أول ما توصل لآخرها نرجع لأولها
+    if (QR.repeat && ms >= cur.to - 40) {
+        qrSeek(QR.audio, (QR.playIdx === 0 ? 0 : cur.from) / 1000);
+        return;
+    }
+    let idx = QR.playIdx;
+    while (idx < tm.ts.length - 1 && ms >= tm.ts[idx].to) idx++;
+    while (idx > 0 && ms < tm.ts[idx].from) idx--;
+    if (idx !== QR.playIdx) {
+        QR.playIdx = idx;
+        qrOnAyahChange();
+    }
+    qrProgress(Math.min(100, Math.max(0, (ms - tm.ts[idx].from) / Math.max(1, tm.ts[idx].to - tm.ts[idx].from) * 100)));
+}
+
+function qrProgress(pct) {
+    const w = pct + "%";
+    const mini = $("qrMiniProg");
+    if (mini) mini.style.width = w;
+    const big = $("qrProg");
+    if (big && qrSamePlaying()) big.style.width = w;
+}
+
+function qrRaf() {
+    if (QR.audio.paused || QR.playIdx < 0) { QR.rafOn = false; return; }
+    qrTick();
+    requestAnimationFrame(qrRaf);
+}
+
+function qrStop() {
+    ++QR.playTok;
+    QR.audios.forEach(a => { a.pause(); a.removeAttribute("src"); a.dataset.src = ""; a.load(); });
+    QR.playIdx = -1;
+    QR.pl = null;
+    document.querySelectorAll(".q-ayah.active").forEach(e => e.classList.remove("active"));
+    qrSyncPlayer();
+    qrUpdateMini();
+    try { if ("mediaSession" in navigator) navigator.mediaSession.metadata = null; } catch (e) {}
+}
+
+// زرار التشغيل الكبير في صفحة السورة
+function qrToggle() {
+    if (qrSamePlaying() && QR.playIdx >= 0) {
+        QR.audio.paused ? QR.audio.play().catch(() => {}) : QR.audio.pause();
+        return;
+    }
+    // السورة اللي قدامك مش هي اللي شغالة — نبدأها من أولها
+    qrPlayIn(QR.cur, 0);
+}
+// زرار التشغيل في المشغّل الصغير
+function qrMiniToggle() {
+    if (!QR.pl || QR.playIdx < 0) return;
+    QR.audio.paused ? QR.audio.play().catch(() => {}) : QR.audio.pause();
+}
+function qrStep(d) {
+    if (QR.pl && QR.playIdx >= 0 && (qrSamePlaying() || !$("qrMushaf"))) {
+        return qrPlayIn(QR.pl, Math.min(QR.pl.ayahs.length - 1, Math.max(0, QR.playIdx + d)));
+    }
+    if (QR.cur) qrPlayIn(QR.cur, 0);
+}
+
+function qrToggleRepeat() {
+    QR.repeat = !QR.repeat;
+    qrSet("repeat", QR.repeat);
+    qrSyncPlayer();
+    toast(QR.repeat ? "🔁 تكرار الآية: شغّال" : "تكرار الآية: مقفول", "info");
+}
+
+function qrSetReciter(v) {
+    QR.reciter = v;
+    qrSet("reciter", v);
+    if (QR.pl && QR.playIdx >= 0 && !QR.audio.paused) qrPlayIn(QR.pl, QR.playIdx);
+    toast("🎙️ القارئ: " + qrReciterName(), "info");
+}
+
+function qrSyncPlayer() {
+    const play = $("qrPlay");
+    if (!play || !QR.cur) return;
+    const same = qrSamePlaying() && QR.playIdx >= 0;
+    const playing = same && !QR.audio.paused;
+    play.textContent = playing ? "⏸" : "▶";
+    play.setAttribute("aria-label", playing ? "إيقاف" : "تشغيل");
+
+    $("qrRepeat").className = "w-10 h-10 shrink-0 rounded-xl font-black " +
+        (QR.repeat ? "bg-emerald-600 text-white" : "bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15");
+
+    const curBm = same && qrIsBm(QR.pl.num, QR.pl.ayahs[QR.playIdx].n);
+    $("qrBmBtn").className = "w-10 h-10 shrink-0 rounded-xl font-black " +
+        (curBm ? "bg-emerald-600 text-white" : "bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15");
+
+    $("qrReciter").value = QR.reciter;
+    const title = `<b class="block text-sm text-slate-800 dark:text-white">سورة ${esc(QR.cur.name)}</b>`;
+    if (same) {
+        $("qrLabel").innerHTML = `${title}آية ${qrAr(QR.pl.ayahs[QR.playIdx].n)} من ${qrAr(QR.pl.ayahs.length)} · ${esc(qrReciterName())}`;
+    } else if (QR.pl && QR.playIdx >= 0) {
+        $("qrLabel").innerHTML = `${title}🔊 شغّال دلوقتي: سورة ${esc(QR.pl.name)} — دوس ▶ تبدأ دي`;
+    } else {
+        $("qrLabel").innerHTML = `${title}دوس ▶ أو اختار آية`;
+    }
+    if (!same) { const p = $("qrProg"); if (p) p.style.width = "0%"; }
+}
+
+/* ---------- المشغّل الصغير (بيظهر في كل الصفحات) ---------- */
+
+function qrMiniVisible() {
+    if (!QR.pl || QR.playIdx < 0 || !S.me) return false;
+    // في صفحة نفس السورة المشغّل الكبير ظاهر — مش محتاجين الصغير
+    return !(parseRoute().name === "quran" && $("qrMushaf") && qrSamePlaying());
+}
+
+function qrUpdateMini() {
+    const box = $("qrMini");
+    if (!box) return;
+    const show = qrMiniVisible();
+    box.classList.toggle("hidden-view", !show);
+    document.body.classList.toggle("qr-mini-on", show);
+    if (!show) return;
+    const a = QR.pl.ayahs[QR.playIdx];
+    const playing = !QR.audio.paused;
+    box.innerHTML = `
+    <div class="rounded-3xl border border-emerald-500/35 bg-white/95 dark:bg-[#0b111c]/95 glass shadow-2xl shadow-emerald-900/20 overflow-hidden">
+        <div class="h-1 bg-emerald-500/15"><div id="qrMiniProg" class="h-full bg-emerald-500 transition-[width] duration-300" style="width:0%"></div></div>
+        <div class="flex items-center gap-2.5 p-2.5">
+            <a href="#/quran/${QR.pl.num}-${a.n}" class="flex items-center gap-2.5 flex-1 min-w-0" title="ارجع للآية">
+                <span class="w-10 h-10 shrink-0 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-lg ${playing ? "qr-pulse" : ""}">📖</span>
+                <span class="min-w-0">
+                    <b class="block text-sm truncate">سورة ${esc(QR.pl.name)} · آية ${qrAr(a.n)}</b>
+                    <span class="block text-[11px] text-slate-500 truncate">${playing ? "🔊" : "⏸"} ${esc(qrReciterName())}</span>
+                </span>
+            </a>
+            <button type="button" onclick="qrStep(-1)" class="w-9 h-9 shrink-0 rounded-xl bg-slate-200 dark:bg-white/10 font-black text-sm" aria-label="الآية اللي قبلها">→</button>
+            <button type="button" onclick="qrMiniToggle()" class="w-10 h-10 shrink-0 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white" aria-label="${playing ? "إيقاف" : "تشغيل"}">${playing ? "⏸" : "▶"}</button>
+            <button type="button" onclick="qrStep(1)" class="w-9 h-9 shrink-0 rounded-xl bg-slate-200 dark:bg-white/10 font-black text-sm" aria-label="الآية اللي بعدها">←</button>
+            <button type="button" onclick="qrStop()" class="w-9 h-9 shrink-0 rounded-xl hover:bg-red-500/10 text-slate-400 hover:text-red-500 font-black" title="قفل التلاوة" aria-label="قفل التلاوة">✕</button>
+        </div>
+    </div>`;
+}
+
+// تحكم من شاشة القفل / سماعات البلوتوث على الموبايل
+function qrMediaSession() {
+    try {
+        if (!("mediaSession" in navigator) || !QR.pl) return;
+        const a = QR.pl.ayahs[QR.playIdx];
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: `سورة ${QR.pl.name} — آية ${a.n}`,
+            artist: qrReciterName(),
+            album: "القرآن الكريم · DARK ZONE"
+        });
+        if (!qrMediaSession.wired) {
+            qrMediaSession.wired = true;
+            navigator.mediaSession.setActionHandler("play", () => QR.audio.play().catch(() => {}));
+            navigator.mediaSession.setActionHandler("pause", () => QR.audio.pause());
+            navigator.mediaSession.setActionHandler("previoustrack", () => qrStep(-1));
+            navigator.mediaSession.setActionHandler("nexttrack", () => qrStep(1));
+        }
+    } catch (e) { /* مش مدعوم */ }
+}
+
+// الأحداث بتتسجل على المشغّلين الاتنين، وبنتجاهل أي حدث من المشغّل اللي مش شغّال دلوقتي
+function qrOnAudio(ev, fn) {
+    QR.audios.forEach(a => a.addEventListener(ev, e => { if (e.target === QR.audio) fn(e); }));
+}
+qrOnAudio("ended", () => {
+    if (!QR.pl) return;
+    if (QR.repeat) return qrPlayIn(QR.pl, QR.playIdx);
+    if (QR.mode === "ayah" && QR.playIdx < QR.pl.ayahs.length - 1) return qrPlayIn(QR.pl, QR.playIdx + 1);
+    toast(`صدق الله العظيم 🤍 — خلصت سورة ${QR.pl.name}`, "success");
+    qrStop();
+});
+qrOnAudio("play", () => {
+    qrSyncPlayer(); qrUpdateMini();
+    if (!QR.rafOn) { QR.rafOn = true; requestAnimationFrame(qrRaf); }
+});
+qrOnAudio("pause", () => { qrSyncPlayer(); qrUpdateMini(); });
+qrOnAudio("timeupdate", () => {
+    if (QR.mode === "surah") return qrTick();   // بيشتغل كمان والتاب في الخلفية
+    const d = QR.audio.duration;
+    qrProgress(d ? Math.min(100, QR.audio.currentTime / d * 100) : 0);
+});
+qrOnAudio("error", () => { if (QR.playIdx >= 0 && QR.audio.dataset.src) toast("مشكلة في تحميل الصوت، جرّب قارئ تاني", "error"); });
+
+// بعد أي تنقّل: نقرر نظهر المشغّل الصغير ولا لأ
+window.addEventListener("hashchange", () => setTimeout(qrUpdateMini, 0));
+
+// التحديث كل 30 ثانية مايعيدش رسم الصفحة (عشان مايقطعش القراية)
+const QURAN_PAGE = { render: renderQuran, after: qrAfter, live: () => {} };
+PAGES.worker.quran = QURAN_PAGE;
+PAGES.owner.quran = QURAN_PAGE;
+PAGES.supervisor.quran = QURAN_PAGE;
+
+/* =========================================================
    ENGLISH MODE
    الصفحات مكتوبة بالعربي، ولما تختار EN بنترجم أي نص
    بيظهر على الشاشة من القاموس ده (حتى النصوص اللي بتظهر بعدين).
@@ -5051,6 +5897,8 @@ PAGES.owner.leaderboard = LB_PAGE;
 ========================================================= */
 
 const EN = {
+    "القرآن الكريم": "Holy Quran", "القرآن": "Quran", "المزيد": "More", "كل الصفحات": "All pages",
+    "الشغل": "Work", "ليك": "For you", "الأدوات": "Tools", "عام": "General", "المراجعة": "Review",
     // ----- المهملات -----
     "المهملات — ملفات التسليمات المدفوعة": "Trash — paid submissions' files",
     "ملفات الموظفين بتتنقل هنا بعد الدفع — إنت بس اللي بتشوفها، والموظف خلاص مايقدرش يوصلها": "Workers' files move here after payment — only you can see them; the worker can no longer access them",
